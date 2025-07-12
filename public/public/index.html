@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Videochatt</title>
+  <style>
+    video { width: 100%; max-width: 400px; background: black; }
+    body { font-family: Arial; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Min Videochatt</h2>
+  <video id="localVideo" autoplay muted playsinline></video>
+  <video id="remoteVideo" autoplay playsinline></video>
+  <button onclick="startCall()">Starta samtal</button>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
