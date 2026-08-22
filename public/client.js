@@ -1,66 +1,86 @@
-const locations = [
-  { id: 'stockholm', city: 'Stockholm', country: 'Sverige', code: 'SE', flag: '🇸🇪', latency: 12, servers: 8, popular: true },
-  { id: 'copenhagen', city: 'Köpenhamn', country: 'Danmark', code: 'DK', flag: '🇩🇰', latency: 18, servers: 5, popular: true },
-  { id: 'amsterdam', city: 'Amsterdam', country: 'Nederländerna', code: 'NL', flag: '🇳🇱', latency: 24, servers: 7, popular: false },
-  { id: 'london', city: 'London', country: 'Storbritannien', code: 'GB', flag: '🇬🇧', latency: 31, servers: 11, popular: true },
-  { id: 'new-york', city: 'New York', country: 'USA', code: 'US', flag: '🇺🇸', latency: 86, servers: 16, popular: false },
-  { id: 'singapore', city: 'Singapore', country: 'Singapore', code: 'SG', flag: '🇸🇬', latency: 143, servers: 6, popular: false },
+const videos = [
+  {
+    id: 'aurora',
+    creator: 'elin.studio',
+    initials: 'E',
+    creatorColor: '#c7f2df',
+    verified: true,
+    title: 'När himlen målar om hela kvällen',
+    caption: 'Tre minuter vid vattnet och lite tålamod. Vilken färg ser du först? ',
+    tags: ['#norrsken', '#ute'],
+    sound: 'originalt ljud · elin.studio',
+    likes: 24800,
+    commentsCount: 486,
+    shares: 921,
+    tone: 'aurora',
+    safeLabel: 'Lugn inspiration',
+    comments: [
+      { initials: 'M', name: 'Mira', text: 'Det här var precis vad jag behövde se idag.' },
+      { initials: 'J', name: 'Joel', text: 'Wow, färgerna är helt otroliga.' },
+    ],
+    liked: false,
+    saved: false,
+    following: false,
+  },
+  {
+    id: 'garden',
+    creator: 'noor.skapa',
+    initials: 'N',
+    creatorColor: '#f0c6a8',
+    verified: true,
+    title: 'Gör en liten balkong till en stor paus',
+    caption: 'Ett enkelt helgprojekt med sådant som redan fanns hemma. Spara om du vill testa! ',
+    tags: ['#skapa', '#vardag'],
+    sound: 'soft sunday · VY sounds',
+    likes: 17300,
+    commentsCount: 208,
+    shares: 614,
+    tone: 'mint',
+    safeLabel: 'Kreativt innehåll',
+    comments: [
+      { initials: 'S', name: 'Sam', text: 'Fint och faktiskt enkelt att prova.' },
+      { initials: 'A', name: 'Ava', text: 'Älskar färgkombinationen!' },
+    ],
+    liked: false,
+    saved: false,
+    following: false,
+  },
+  {
+    id: 'night',
+    creator: 'leo.foto',
+    initials: 'L',
+    creatorColor: '#d2c9fa',
+    verified: false,
+    title: 'En nattpromenad utan filter',
+    caption: 'Stanna upp och lägg märke till ljusen runt dig. Små saker räknas också. ',
+    tags: ['#foto', '#natt'],
+    sound: 'midnight walk · leo.foto',
+    likes: 9100,
+    commentsCount: 97,
+    shares: 301,
+    tone: 'night',
+    safeLabel: 'Kreativt innehåll',
+    comments: [
+      { initials: 'R', name: 'Rami', text: 'Den här stämningen! 🌙' },
+    ],
+    liked: false,
+    saved: false,
+    following: false,
+  },
 ];
 
-const viewMeta = {
-  browser: { kicker: 'Webbläsare', title: 'Privat webbläsare' },
-  locations: { kicker: 'Platser', title: 'Serverplatser' },
-  protection: { kicker: 'Skydd', title: 'Integritetscenter' },
-  activity: { kicker: 'Aktivitet', title: 'Din aktivitet' },
-  settings: { kicker: 'Inställningar', title: 'NOVA-inställningar' },
-};
-
-const defaultHistory = [
-  { icon: 'browser', title: 'NOVA startsida', detail: 'Privat session', time: 'Nu', tone: 'green' },
-  { icon: 'map', title: 'Stockholm, Sverige', detail: 'Vald serverplats', time: 'Idag', tone: 'purple' },
-  { icon: 'shield-check', title: 'Skyddsinställningar', detail: 'Kontrollerad lokalt', time: 'Idag', tone: 'orange' },
+const fallbackReports = [
+  { id: 'RPT-1042', category: 'Olämplig kontakt', detail: 'Rapport från 13–17-profil · video #aurora', priority: 'critical', time: '12:42', status: 'new' },
+  { id: 'RPT-1041', category: 'Kommentarfilter', detail: 'Externa kontaktuppgifter · video #garden', priority: 'high', time: '12:18', status: 'new' },
+  { id: 'RPT-1038', category: 'Farlig utmaning', detail: 'Automatisk flaggning · väntar på granskning', priority: 'low', time: '11:55', status: 'reviewed' },
 ];
-
-const defaultSettings = {
-  'private-connection': true,
-  trackers: true,
-  ads: false,
-  'kill-switch': true,
-};
-
-const storage = {
-  get(key, fallback) {
-    try {
-      const value = window.localStorage.getItem(key);
-      return value === null ? fallback : JSON.parse(value);
-    } catch (error) {
-      return fallback;
-    }
-  },
-  set(key, value) {
-    try {
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      // Local storage can be disabled in private browser contexts. The UI still works.
-    }
-  },
-  remove(key) {
-    try {
-      window.localStorage.removeItem(key);
-    } catch (error) {
-      // Ignore storage errors and keep the current in-memory state.
-    }
-  },
-};
 
 const state = {
-  activeView: 'browser',
-  connection: 'idle',
-  selectedLocationId: storage.get('nova-location', 'stockholm'),
-  history: storage.get('nova-history', defaultHistory),
-  settings: { ...defaultSettings, ...storage.get('nova-settings', {}) },
-  bookmarked: false,
-  currentUrl: '',
+  activeView: 'feed',
+  activeVideoId: videos[0].id,
+  feedTab: 'for-you',
+  reports: [],
+  safety: { reports: true, comments: true },
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -79,471 +99,356 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
-function selectedLocation() {
-  return locations.find((location) => location.id === state.selectedLocationId) || locations[0];
+function getVideo(id) {
+  return videos.find((video) => video.id === id) || videos[0];
+}
+
+function formatCount(value) {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace('.', ',')}m`;
+  if (value >= 1000) return `${(value / 1000).toFixed(value >= 10000 ? 1 : 1).replace('.', ',')}k`;
+  return String(value);
 }
 
 function setView(view) {
-  if (!viewMeta[view]) return;
+  const allowedViews = ['feed', 'following', 'create', 'safety', 'moderator'];
+  if (!allowedViews.includes(view)) return;
 
   state.activeView = view;
-  $$('.nav-item[data-view]').forEach((item) => {
-    item.classList.toggle('is-active', item.dataset.view === view);
-  });
   $$('[data-view-panel]').forEach((panel) => {
     panel.classList.toggle('is-visible', panel.dataset.viewPanel === view);
   });
+  $$('.nav-item[data-view], .mobile-nav-item[data-view]').forEach((item) => {
+    item.classList.toggle('is-active', item.dataset.view === view);
+  });
 
-  const meta = viewMeta[view];
-  $('#view-kicker').textContent = meta.kicker;
-  $('#view-title').textContent = meta.title;
-
-  if (view === 'locations') renderLocationGrid($('#location-search')?.value || '');
-  if (view === 'activity') renderActivity();
+  const titles = {
+    feed: 'För dig',
+    following: 'Följer',
+    create: 'Ny video',
+    safety: 'Trygghet först',
+    moderator: 'Moderatorcenter',
+  };
+  $('#page-title').textContent = titles[view];
+  if (view === 'moderator') renderReports();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function renderConnection() {
-  const location = selectedLocation();
-  const card = $('#connection-card');
-  const topStatusText = $('#top-status-text');
-  const topStatusPulse = $('#top-status-pulse');
-  const cardStatusPulse = $('#card-status-pulse');
-  const title = $('#connection-title');
-  const description = $('#connection-description');
-  const toggle = $('#connection-toggle');
-  const ipAddress = $('#ip-address');
-  const protocol = $('#protocol-value');
+function renderFeed() {
+  const feed = $('#video-feed');
+  if (!feed) return;
 
-  const isConnected = state.connection === 'connected';
-  const isConnecting = state.connection === 'connecting';
+  let orderedVideos = [...videos];
+  if (state.feedTab === 'new') orderedVideos.reverse();
 
-  card.classList.toggle('is-connected', isConnected);
-  card.classList.toggle('is-connecting', isConnecting);
-  [topStatusPulse, cardStatusPulse].forEach((pulse) => {
-    pulse.classList.toggle('is-connected', isConnected);
-    pulse.classList.toggle('is-connecting', isConnecting);
+  feed.innerHTML = orderedVideos.map((video, index) => `
+    <article class="video-card ${index === 0 ? 'is-featured' : 'video-card--compact'}" data-video-id="${video.id}">
+      <div class="video-stage theme-${video.tone}" role="img" aria-label="Demo-video från ${escapeHtml(video.creator)}">
+        <div class="video-art"></div>
+        <div class="video-topline"><span class="content-pill"><i></i> ${escapeHtml(video.safeLabel)}</span><button class="video-menu" type="button" data-action="video-menu" aria-label="Fler alternativ">${icon('more')}</button></div>
+        <button class="video-play" type="button" data-action="play" aria-label="Spela video">${icon('play')}</button>
+        <div class="video-info">
+          <div class="creator-line"><span class="creator-avatar" style="--creator-color: ${video.creatorColor}">${escapeHtml(video.initials)}</span><span class="creator-name">@${escapeHtml(video.creator)} ${video.verified ? `<span class="creator-verified">${icon('check', 'icon-xs')}</span>` : ''}</span><button class="follow-button ${video.following ? 'is-following' : ''}" type="button" data-action="follow">${video.following ? 'Följer' : 'Följ'}</button></div>
+          <h2>${escapeHtml(video.title)}</h2>
+          <p class="video-caption">${escapeHtml(video.caption)} ${video.tags.map((tag) => `<span class="hashtag">${escapeHtml(tag)}</span>`).join(' ')}</p>
+          <div class="sound-line">${icon('music', 'icon-xs')}<span>${escapeHtml(video.sound)}</span></div>
+        </div>
+        <div class="video-progress"><span style="width: ${index === 0 ? '42%' : index === 1 ? '67%' : '26%'}"></span></div>
+      </div>
+      <aside class="video-actions" aria-label="Videoåtgärder">
+        <button class="action-button avatar-action" type="button" data-action="follow" aria-label="Följ ${escapeHtml(video.creator)}"><span class="action-avatar" style="background: ${video.creatorColor}">${escapeHtml(video.initials)}</span></button>
+        <button class="action-button ${video.liked ? 'is-liked' : ''}" type="button" data-action="like" aria-label="Gilla video"><span>${icon('heart')}</span><span class="action-count">${formatCount(video.likes)}</span></button>
+        <button class="action-button" type="button" data-action="comments" aria-label="Visa kommentarer"><span>${icon('message')}</span><span class="action-count">${formatCount(video.commentsCount)}</span></button>
+        <button class="action-button ${video.saved ? 'is-saved' : ''}" type="button" data-action="save" aria-label="Spara video"><span>${icon('bookmark')}</span><span class="action-count">Spara</span></button>
+        <button class="action-button" type="button" data-action="share" aria-label="Dela video"><span>${icon('share')}</span><span class="action-count">${formatCount(video.shares)}</span></button>
+        <button class="action-button" type="button" data-action="report" aria-label="Rapportera video"><span>${icon('flag')}</span><span class="action-count">Rapport</span></button>
+      </aside>
+    </article>
+  `).join('');
+}
+
+function updateVideoControls(video) {
+  const card = $(`[data-video-id="${video.id}"]`);
+  if (!card) return;
+  const likeButton = card.querySelector('[data-action="like"]');
+  const saveButton = card.querySelector('[data-action="save"]');
+  const followButtons = card.querySelectorAll('[data-action="follow"]');
+  if (likeButton) {
+    likeButton.classList.toggle('is-liked', video.liked);
+    const count = likeButton.querySelector('.action-count');
+    if (count) count.textContent = formatCount(video.likes);
+  }
+  if (saveButton) saveButton.classList.toggle('is-saved', video.saved);
+  followButtons.forEach((button) => {
+    button.classList.toggle('is-following', video.following);
+    if (button.classList.contains('follow-button')) button.textContent = video.following ? 'Följer' : 'Följ';
   });
-
-  if (isConnecting) {
-    topStatusText.textContent = 'Ansluter…';
-    title.textContent = 'Ansluter…';
-    description.textContent = `Upprättar session mot ${location.city}.`;
-    ipAddress.textContent = 'Tilldelas…';
-    protocol.textContent = 'Förbereder';
-  } else if (isConnected) {
-    topStatusText.textContent = 'Skyddad anslutning';
-    title.textContent = 'Skyddad';
-    description.textContent = 'Din privata demosession är aktiv.';
-    ipAddress.textContent = '185.12.•••.42';
-    protocol.textContent = 'Demo-tunnel';
-  } else {
-    topStatusText.textContent = 'Ej ansluten';
-    title.textContent = 'Ej skyddad';
-    description.textContent = 'Anslut för att starta en privat session.';
-    ipAddress.textContent = 'Inte tillgänglig';
-    protocol.textContent = '—';
-  }
-
-  toggle.disabled = isConnecting;
-  toggle.setAttribute('aria-pressed', String(isConnected));
-  toggle.setAttribute('aria-label', isConnected ? 'Koppla från VPN' : 'Anslut VPN');
-  $('#top-connection-status').setAttribute('aria-label', isConnected ? 'Koppla från VPN' : 'Anslut VPN');
-  $('#selected-location-name').textContent = `${location.city}, ${location.country}`;
-  $('#selected-location-meta').textContent = `${location.code} · ${location.latency} ms`;
 }
 
-function toggleConnection() {
-  if (state.connection === 'connecting') return;
-
-  if (state.connection === 'connected') {
-    state.connection = 'idle';
-    renderConnection();
-    addHistory({ icon: 'power', title: 'Privat session avslutad', detail: 'NOVA demosession', time: 'Nu', tone: 'orange' });
-    showToast('Sessionen är pausad.');
-    return;
-  }
-
-  state.connection = 'connecting';
-  renderConnection();
-  showToast(`Ansluter till ${selectedLocation().city}…`);
-
-  window.setTimeout(() => {
-    if (state.connection !== 'connecting') return;
-    state.connection = 'connected';
-    renderConnection();
-    addHistory({ icon: 'shield-check', title: 'Privat session startad', detail: selectedLocation().city, time: 'Nu', tone: 'green' });
-    showToast(`Ansluten till ${selectedLocation().city}. Demo-tunneln är aktiv.`);
-  }, 950);
+function toggleLike(video) {
+  video.liked = !video.liked;
+  video.likes += video.liked ? 1 : -1;
+  updateVideoControls(video);
+  showToast(video.liked ? 'Gillad. Fint att visa stöd.' : 'Gilla borttagen.');
 }
 
-function renderPicker() {
-  const pickerOptions = $('#picker-options');
-  if (!pickerOptions) return;
-
-  pickerOptions.innerHTML = locations.slice(0, 5).map((location) => `
-    <button class="picker-option ${location.id === state.selectedLocationId ? 'is-selected' : ''}" type="button" data-location-id="${location.id}">
-      <span class="picker-flag">${location.flag}</span>
-      <span class="picker-option-copy"><strong>${escapeHtml(location.city)}</strong><small>${escapeHtml(location.country)} · ${location.latency} ms</small></span>
-      ${icon('check', 'icon-xs')}
-    </button>
-  `).join('');
+function toggleSave(video) {
+  video.saved = !video.saved;
+  updateVideoControls(video);
+  showToast(video.saved ? 'Videon sparades privat.' : 'Videon togs bort från sparade.');
 }
 
-function togglePicker(force) {
-  const picker = $('#location-picker');
-  if (!picker) return;
-  const shouldOpen = typeof force === 'boolean' ? force : !picker.classList.contains('is-open');
-  picker.classList.toggle('is-open', shouldOpen);
-  picker.setAttribute('aria-hidden', String(!shouldOpen));
-  if (shouldOpen) renderPicker();
+function toggleFollow(video) {
+  video.following = !video.following;
+  updateVideoControls(video);
+  showToast(video.following ? `Du följer @${video.creator}.` : `Du följer inte längre @${video.creator}.`);
 }
 
-function selectLocation(id) {
-  const location = locations.find((entry) => entry.id === id);
-  if (!location) return;
-
-  state.selectedLocationId = id;
-  storage.set('nova-location', id);
-  renderConnection();
-  renderPicker();
-  renderLocationGrid($('#location-search')?.value || '');
-  togglePicker(false);
-
-  if (state.connection === 'connected') {
-    showToast(`${location.city} vald. Anslut igen för att byta demo-plats.`);
-  } else {
-    showToast(`${location.city}, ${location.country} vald.`);
-  }
+function togglePlayback(button) {
+  const isPlaying = button.classList.toggle('is-playing');
+  button.innerHTML = icon(isPlaying ? 'pause' : 'play');
+  button.setAttribute('aria-label', isPlaying ? 'Pausa video' : 'Spela video');
+  showToast(isPlaying ? 'Video spelas i demo-läge.' : 'Video pausad.');
 }
 
-function renderLocationGrid(filter = '') {
-  const grid = $('#location-grid');
-  if (!grid) return;
-
-  const query = filter.trim().toLocaleLowerCase('sv-SE');
-  const filtered = locations.filter((location) =>
-    `${location.city} ${location.country} ${location.code}`.toLocaleLowerCase('sv-SE').includes(query),
-  );
-
-  if (!filtered.length) {
-    grid.innerHTML = '<div class="empty-state">Ingen plats matchar din sökning.</div>';
-    return;
-  }
-
-  grid.innerHTML = filtered.map((location) => `
-    <button class="location-card ${location.id === state.selectedLocationId ? 'is-selected' : ''}" type="button" data-location-id="${location.id}">
-      <span class="location-flag">${location.flag}</span>
-      <span class="location-card-copy"><strong>${escapeHtml(location.city)}, ${escapeHtml(location.country)}</strong><span>${location.servers} servrar · ${location.popular ? 'Populär plats' : 'Tillgänglig'}</span></span>
-      <span class="location-latency">${location.latency} ms</span>
-      ${icon('check', 'icon-xs checkmark')}
-    </button>
-  `).join('');
-}
-
-function renderActivity() {
-  const list = $('#activity-list');
+function renderComments(video) {
+  const list = $('#comments-list');
   if (!list) return;
+  list.innerHTML = video.comments.length
+    ? video.comments.map((comment) => `<div class="comment"><span class="comment-avatar">${escapeHtml(comment.initials)}</span><div class="comment-copy"><strong>${escapeHtml(comment.name)}</strong><p>${escapeHtml(comment.text)}</p></div></div>`).join('')
+    : '<div class="comments-empty">Inga kommentarer ännu. Säg något snällt först.</div>';
+}
 
-  if (!state.history.length) {
-    list.innerHTML = '<div class="activity-empty">Ingen lokal aktivitet att visa ännu.</div>';
+function openComments(video) {
+  state.activeVideoId = video.id;
+  $('#comments-title').textContent = `Kommentarer · @${video.creator}`;
+  renderComments(video);
+  $('#comments-modal').hidden = false;
+  document.body.classList.add('modal-open');
+  window.setTimeout(() => $('#comment-input')?.focus(), 80);
+}
+
+function openReport(video = getVideo(state.activeVideoId)) {
+  state.activeVideoId = video.id;
+  $('#report-form').reset();
+  $('#report-video-id').value = video.id;
+  $('#report-subtitle').textContent = `Rapport om @${video.creator}. Din rapport går till VY:s moderatorer. Du kan vara anonym i prototypen.`;
+  $('#report-modal').hidden = false;
+  document.body.classList.add('modal-open');
+  window.setTimeout(() => $('#report-reason')?.focus(), 80);
+}
+
+function closeModals() {
+  $('#report-modal').hidden = true;
+  $('#comments-modal').hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function isUnsafeComment(text) {
+  const normalized = text.toLocaleLowerCase('sv-SE');
+  const contactWords = ['snapchat', 'telegram', 'whatsapp', 'signal', 'discord', 'dm:a', 'dm', 'träffas', 'meetup'];
+  const hasContactWord = contactWords.some((word) => normalized.includes(word));
+  const hasContactData = /(?:https?:\/\/|www\.|[\w.+-]+@[\w.-]+\.[a-z]{2,}|\+?\d[\d\s-]{7,})/i.test(text);
+  return hasContactWord || hasContactData;
+}
+
+async function submitReport(event) {
+  event.preventDefault();
+  const reason = $('#report-reason').value;
+  const videoId = $('#report-video-id').value || state.activeVideoId;
+  if (!reason) {
+    showToast('Välj en anledning så skickas rapporten rätt.', 'warning');
     return;
   }
 
-  list.innerHTML = state.history.slice(0, 12).map((entry) => `
-    <div class="activity-row">
-      <div class="activity-icon activity-icon--${escapeHtml(entry.tone || 'green')}" aria-hidden="true">${icon(entry.icon || 'clock', 'icon-sm')}</div>
-      <div class="activity-copy"><strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.detail)}</span></div>
-      <span class="activity-time">${escapeHtml(entry.time)}</span>
+  const payload = { videoId, reason, details: $('#report-details').value.trim() };
+  try {
+    await fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  } catch (error) {
+    // The prototype still confirms the safety action when the optional API is offline.
+  }
+  closeModals();
+  showToast('Rapport skickad till moderatorerna. Tack för att du säger till.');
+  if (state.activeView === 'moderator') loadReports();
+}
+
+function addComment(event) {
+  event.preventDefault();
+  const input = $('#comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (isUnsafeComment(text)) {
+    input.value = '';
+    showToast('Kommentaren stoppades: kontaktuppgifter och kontaktförsök tillåts inte.', 'warning');
+    return;
+  }
+
+  const video = getVideo(state.activeVideoId);
+  video.comments.unshift({ initials: 'A', name: 'Du', text });
+  video.commentsCount += 1;
+  input.value = '';
+  renderComments(video);
+  updateVideoControls(video);
+  showToast('Kommentaren publicerades efter trygghetskontroll.');
+}
+
+async function shareVideo(video) {
+  const shareUrl = `${window.location.origin}${window.location.pathname}#video-${video.id}`;
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    showToast('Länk kopierad. Den innehåller inga privata kontaktuppgifter.');
+  } catch (error) {
+    showToast('Delning är redo i demo-läge.');
+  }
+}
+
+function renderReports() {
+  const list = $('#report-list');
+  if (!list) return;
+  const reports = state.reports.length ? state.reports : fallbackReports;
+  const newCount = reports.filter((report) => report.status === 'new').length;
+  $('#new-report-count').textContent = String(newCount);
+
+  list.innerHTML = reports.map((report) => `
+    <div class="report-item" data-report-id="${escapeHtml(report.id)}">
+      <span class="report-priority report-priority--${escapeHtml(report.priority || 'high')}"></span>
+      <div class="report-copy"><strong>${escapeHtml(report.category)}</strong><span>${escapeHtml(report.detail)} · ${escapeHtml(report.id)}</span></div>
+      <div class="report-meta"><time>${escapeHtml(report.time || 'Nu')}</time><span class="report-status ${report.status === 'reviewed' ? 'report-status--reviewed' : ''}">${report.status === 'reviewed' ? 'Granskad' : 'Ny'}</span></div>
+      ${report.status !== 'reviewed' ? `<button class="report-action" type="button" data-action="resolve-report" data-report-id="${escapeHtml(report.id)}" aria-label="Markera ${escapeHtml(report.id)} som granskad">${icon('check', 'icon-sm')}</button>` : ''}
     </div>
   `).join('');
 }
 
-function addHistory(entry) {
-  state.history = [entry, ...state.history.filter((item) => !(item.title === entry.title && item.detail === entry.detail))].slice(0, 12);
-  storage.set('nova-history', state.history);
-  if (state.activeView === 'activity') renderActivity();
-}
-
-function clearHistory() {
-  state.history = [];
-  storage.set('nova-history', state.history);
-  renderActivity();
-  showToast('Den lokala historiken är rensad.');
-}
-
-function renderWelcome() {
-  $('#active-tab-title').textContent = 'Ny flik';
-  $('#address-input').value = '';
-  state.currentUrl = '';
-  state.bookmarked = false;
-  $('#bookmark-button').classList.remove('is-bookmarked');
-  $('#bookmark-button').setAttribute('aria-label', 'Bokmärk sidan');
-  $('#browser-page').innerHTML = `
-    <div class="browser-page-inner">
-      <div class="welcome-layout">
-        <div class="welcome-copy">
-          <div class="welcome-eyebrow"><span class="eyebrow-line"></span> PRIVAT LÄGE AKTIVT</div>
-          <h2>Privat börjar<br /><em>här.</em></h2>
-          <p>Öppna en flik. Låt resten stanna hos dig.</p>
-        </div>
-        <div class="shield-visual" aria-hidden="true">
-          <div class="shield-glow"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-          <div class="shield-core">${icon('shield-check', 'icon-xl')}</div><span class="orbit-dot orbit-dot-one"></span><span class="orbit-dot orbit-dot-two"></span>
-        </div>
-      </div>
-      <form class="private-search" id="private-search-form">
-        ${icon('search', 'search-icon')}<input id="private-search-input" type="text" placeholder="Sök privat eller ange en webbadress" autocomplete="off" />
-        <button class="search-submit" type="submit"><span>Sök</span>${icon('arrow-right', 'icon-sm')}</button>
-      </form>
-      <div class="search-hint"><span>Tryck</span><kbd>⌘</kbd><kbd>K</kbd><span>för att fokusera</span></div>
-      <div class="quick-section">
-        <div class="section-heading-row"><div><span class="mini-label">SNABBÅTKOMST</span><h3>Dina platser</h3></div><button class="text-button" type="button" data-action="manage-bookmarks">Hantera ${icon('chevron-right', 'icon-xs')}</button></div>
-        <div class="quick-links">
-          <button class="quick-link quick-link--blue" type="button" data-url="https://duckduckgo.com/"><span class="quick-link-icon">D</span><span><strong>DuckDuckGo</strong><small>Privat sökning</small></span>${icon('external', 'icon-sm quick-link-arrow')}</button>
-          <button class="quick-link quick-link--purple" type="button" data-url="https://wikipedia.org/"><span class="quick-link-icon">W</span><span><strong>Wikipedia</strong><small>Fri kunskap</small></span>${icon('external', 'icon-sm quick-link-arrow')}</button>
-          <button class="quick-link quick-link--orange" type="button" data-url="https://github.com/"><span class="quick-link-icon">⌘</span><span><strong>GitHub</strong><small>Dina projekt</small></span>${icon('external', 'icon-sm quick-link-arrow')}</button>
-        </div>
-      </div>
-      <div class="page-disclaimer">${icon('info', 'icon-sm')}<span>Det här är en webbläsarprototyp. En webbsida kan inte skapa en riktig VPN-tunnel utan en separat VPN-klient eller server.</span></div>
-    </div>
-  `;
-  $('#private-search-form').addEventListener('submit', handlePrivateSearchSubmit);
-}
-
-function normalizeUrl(value) {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (/^https?:\/\//i.test(trimmed)) {
-    try {
-      const url = new URL(trimmed);
-      return /^https?:$/.test(url.protocol) ? url.href : null;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  if (/^[\w-]+\.[a-z]{2,}(\/.*)?$/i.test(trimmed)) {
-    try {
-      return new URL(`https://${trimmed}`).href;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  return null;
-}
-
-function hostLabel(url) {
+async function loadReports() {
   try {
-    return new URL(url).hostname.replace(/^www\./, '');
+    const response = await fetch('/api/moderation/reports', { headers: { Accept: 'application/json' } });
+    if (response.ok) state.reports = await response.json();
   } catch (error) {
-    return url;
+    state.reports = [...fallbackReports];
   }
+  renderReports();
 }
 
-function openDestination(url, label = hostLabel(url)) {
-  const safeUrl = normalizeUrl(url);
-  if (!safeUrl) {
-    showToast('Adressen kunde inte öppnas. Använd en http- eller https-adress.');
-    return;
+async function resolveReport(id) {
+  const report = state.reports.find((entry) => entry.id === id);
+  if (report) report.status = 'reviewed';
+  try {
+    await fetch(`/api/moderation/reports/${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'reviewed' }) });
+  } catch (error) {
+    // Keep the local demo state if the API is unavailable.
   }
-
-  const host = hostLabel(safeUrl);
-  state.currentUrl = safeUrl;
-  $('#address-input').value = safeUrl;
-  $('#active-tab-title').textContent = host;
-  state.bookmarked = false;
-  $('#bookmark-button').classList.remove('is-bookmarked');
-  $('#bookmark-button').setAttribute('aria-label', 'Bokmärk sidan');
-  addHistory({ icon: 'external', title: label, detail: host, time: 'Nu', tone: 'purple' });
-
-  $('#browser-page').innerHTML = `
-    <div class="destination-view">
-      <div class="destination-card">
-        <div class="destination-icon">${icon('external', 'icon-lg')}</div>
-        <span class="mini-label">LÄNK REDO</span>
-        <h2>${escapeHtml(label)}</h2>
-        <p>NOVA kan förbereda adressen här. Öppna den i en ny flik när du vill fortsätta.</p>
-        <span class="destination-url">${escapeHtml(safeUrl)}</span>
-        <button class="primary-button" id="destination-open" type="button">Öppna i ny flik ${icon('arrow-right', 'icon-sm')}</button>
-        <div class="page-disclaimer" style="margin-top: 18px; text-align: left;">${icon('info', 'icon-sm')}<span>Den här prototypen skickar inte trafik genom en riktig VPN-tunnel.</span></div>
-      </div>
-    </div>
-  `;
-
-  $('#destination-open').addEventListener('click', () => {
-    window.open(safeUrl, '_blank', 'noopener,noreferrer');
-    showToast(`Öppnar ${host} i en ny flik.`);
-  });
+  renderReports();
+  showToast(`${id} markerad som granskad.`);
 }
 
-function renderSearchResults(query) {
-  const cleanQuery = query.trim();
-  if (!cleanQuery) {
-    showToast('Skriv något att söka efter.');
-    $('#private-search-input')?.focus();
-    return;
-  }
-
-  const escapedQuery = escapeHtml(cleanQuery);
-  $('#active-tab-title').textContent = `Sök: ${cleanQuery.slice(0, 16)}`;
-  $('#address-input').value = cleanQuery;
-  state.currentUrl = `search:${cleanQuery}`;
-  state.bookmarked = false;
-  $('#bookmark-button').classList.remove('is-bookmarked');
-  $('#bookmark-button').setAttribute('aria-label', 'Bokmärk sidan');
-  addHistory({ icon: 'search', title: `Sökning: ${cleanQuery}`, detail: 'Lokal demosökning', time: 'Nu', tone: 'green' });
-
-  const results = [
-    { domain: 'nova.guide', title: `Så skyddar du din integritet online`, description: 'En enkel guide till säkrare lösenord, privat sökning och tydliga sekretessval.', url: 'https://nova.guide/privacy' },
-    { domain: 'privacy.tools', title: `Verktyg för en lugnare webbläsare`, description: 'Lär dig hur spårarskydd, säkra anslutningar och lokala inställningar fungerar.', url: 'https://privacy.tools/browser' },
-    { domain: 'open.knowledge', title: `Kunskap om ${cleanQuery}`, description: 'Utforska ett neutralt perspektiv och hitta källor som hjälper dig vidare.', url: 'https://open.knowledge/explore' },
-  ];
-
-  $('#browser-page').innerHTML = `
-    <div class="search-results-view">
-      <div class="search-results-head"><div><span class="mini-label">PRIVAT DEMOSÖKNING</span><h2>Resultat för “${escapedQuery}”</h2><p>Tre exempel på hur sökresultat kan presenteras utan brus.</p></div>${icon('search', 'icon-lg')}</div>
-      <div class="result-list">
-        ${results.map((result) => `<button class="result-item" type="button" data-url="${result.url}" data-label="${escapeHtml(result.title)}"><span class="result-domain">${result.domain}</span><h3>${escapeHtml(result.title)}</h3><p>${escapeHtml(result.description)}</p></button>`).join('')}
-      </div>
-      <div class="page-disclaimer" style="margin-top: 25px;">${icon('info', 'icon-sm')}<span>Detta är lokala exempelresultat i prototypen — ingen sökmotoranrop görs från servern.</span></div>
-    </div>
-  `;
+function handleUpload(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  $('#upload-title').textContent = file.name;
+  $('#upload-subtitle').textContent = `${Math.round(file.size / 1024 / 1024 * 10) / 10 || '< 0,1'} MB · redo för förhandsgranskning`;
+  $('#upload-zone').classList.add('is-uploaded');
 }
 
-function handleSearch(value) {
-  const trimmed = value.trim();
-  const url = normalizeUrl(trimmed);
-  if (url) {
-    openDestination(url);
-  } else {
-    renderSearchResults(trimmed);
-  }
-}
-
-function handlePrivateSearchSubmit(event) {
+function submitVideo(event) {
   event.preventDefault();
-  handleSearch($('#private-search-input')?.value || '');
-}
-
-function toggleBookmark() {
-  if (!state.currentUrl) {
-    showToast('Öppna en adress eller sök först för att bokmärka.');
+  if (!$('#video-file').files?.length) {
+    showToast('Välj en video först.', 'warning');
     return;
   }
-  state.bookmarked = !state.bookmarked;
-  $('#bookmark-button').classList.toggle('is-bookmarked', state.bookmarked);
-  $('#bookmark-button').setAttribute('aria-label', state.bookmarked ? 'Ta bort bokmärke' : 'Bokmärk sidan');
-  showToast(state.bookmarked ? 'Sidan sparades bland dina bokmärken.' : 'Bokmärket togs bort.');
-}
-
-function toggleSetting(button) {
-  const key = button.dataset.setting;
-  if (!key) return;
-  state.settings[key] = !state.settings[key];
-  storage.set('nova-settings', state.settings);
-  button.classList.toggle('is-on', state.settings[key]);
-  button.setAttribute('aria-label', `${key} ${state.settings[key] ? 'på' : 'av'}`);
-  showToast(`${settingLabel(key)} ${state.settings[key] ? 'aktiverad' : 'avstängd'}.`);
-
-  if (key === 'ads') {
-    $('#ads-blocked').textContent = state.settings.ads ? '46' : '0';
+  if (!$('#confirm-rights').checked) {
+    showToast('Bekräfta att du har rätt att publicera materialet.', 'warning');
+    return;
   }
+  if (!$('#no-location').checked) {
+    showToast('Aktivera borttagning av platsdata för att fortsätta säkert.', 'warning');
+    return;
+  }
+  showToast('Videon klarade förhandskontrollen i demo-läge.');
+  $('#create-form').reset();
+  $('#upload-title').textContent = 'Släpp en video här';
+  $('#upload-subtitle').textContent = 'MP4 eller MOV · max 60 sekunder';
+  $('#upload-zone').classList.remove('is-uploaded');
+  setView('feed');
 }
 
-function settingLabel(key) {
-  return {
-    'private-connection': 'Privat anslutning',
-    trackers: 'Spårarblockering',
-    ads: 'Annonsblockering',
-    'kill-switch': 'Kill switch',
-  }[key] || 'Inställningen';
+function toggleSafetySetting(button) {
+  const key = button.dataset.safetySetting;
+  state.safety[key] = !state.safety[key];
+  button.classList.toggle('is-on', state.safety[key]);
+  button.setAttribute('aria-label', `${key} ${state.safety[key] ? 'aktiv' : 'avstängd'}`);
+  showToast(`${key === 'comments' ? 'Kommentarfilter' : 'Snabb rapportering'} ${state.safety[key] ? 'på' : 'av'}.`);
 }
 
-function clearLocalData() {
-  storage.remove('nova-location');
-  storage.remove('nova-history');
-  storage.remove('nova-settings');
-  state.selectedLocationId = 'stockholm';
-  state.history = [...defaultHistory];
-  state.settings = { ...defaultSettings };
-  renderConnection();
-  renderPicker();
-  renderActivity();
-  $$('.switch[data-setting]').forEach((button) => {
-    const isOn = Boolean(state.settings[button.dataset.setting]);
-    button.classList.toggle('is-on', isOn);
-  });
-  showToast('Lokal data återställd i prototypen.');
-}
-
-function showToast(message) {
+function showToast(message, tone = 'success') {
   const container = $('#toast-container');
   if (!container) return;
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `${icon('check', 'icon-sm')}<span>${escapeHtml(message)}</span>`;
+  toast.className = `toast ${tone === 'warning' ? 'toast--warning' : tone === 'danger' ? 'toast--danger' : ''}`;
+  toast.innerHTML = `${icon(tone === 'success' ? 'check' : 'alert', 'icon-sm')}<span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
   window.setTimeout(() => {
     toast.classList.add('is-leaving');
-    window.setTimeout(() => toast.remove(), 210);
-  }, 3000);
+    window.setTimeout(() => toast.remove(), 190);
+  }, 3100);
 }
 
-function refreshBrowser() {
-  const button = $('[data-action="refresh"]');
-  button?.classList.add('is-spinning');
-  window.setTimeout(() => button?.classList.remove('is-spinning'), 650);
-  showToast(state.currentUrl ? 'Sidan uppdaterades i prototypen.' : 'NOVA startsida är redan aktuell.');
-}
+function handleAction(action, element) {
+  const card = element?.closest('[data-video-id]');
+  const video = card ? getVideo(card.dataset.videoId) : getVideo(state.activeVideoId);
 
-function autoSelectLocation() {
-  const fastest = [...locations].sort((a, b) => a.latency - b.latency)[0];
-  selectLocation(fastest.id);
-  setView('locations');
-}
-
-function handleAction(action) {
   switch (action) {
-    case 'toggle-connection':
-      toggleConnection();
+    case 'go-feed':
+      setView('feed');
       break;
-    case 'new-tab':
-      setView('browser');
-      renderWelcome();
-      showToast('En ny privat flik öppnades.');
-      break;
-    case 'refresh':
-      refreshBrowser();
-      break;
-    case 'go-back':
-    case 'go-forward':
-      showToast('Navigering mellan sidor är avstängd i prototypen.');
-      break;
-    case 'browser-menu':
-      showToast('Webbläsarmenyn kommer i nästa version.');
-      break;
-    case 'manage-bookmarks':
-      showToast('Bokmärken sparas lokalt på den här enheten.');
-      break;
-    case 'close-picker':
-      togglePicker(false);
-      break;
-    case 'auto-location':
-      autoSelectLocation();
-      break;
-    case 'clear-history':
-      clearHistory();
-      break;
-    case 'clear-local-data':
-      clearLocalData();
-      break;
-    case 'help':
-      showToast('Tips: anslut först och välj sedan en serverplats.');
+    case 'profile-menu':
+      showToast('Profilinställningar kommer efter trygg inloggning.');
       break;
     case 'notifications':
-      showToast('Du har inga nya aviseringar.');
+      showToast('Inga nya säkerhetsaviseringar.');
+      break;
+    case 'help':
+      showToast('Tips: använd Rapportera om något känns fel — du behöver inte vara säker.');
+      break;
+    case 'video-menu':
+      showToast('Menyn innehåller rapportera, blockera och dölj.');
+      break;
+    case 'play':
+      togglePlayback(element);
+      break;
+    case 'like':
+      state.activeVideoId = video.id;
+      toggleLike(video);
+      break;
+    case 'save':
+      state.activeVideoId = video.id;
+      toggleSave(video);
+      break;
+    case 'follow':
+      state.activeVideoId = video.id;
+      toggleFollow(video);
+      break;
+    case 'comments':
+      openComments(video);
+      break;
+    case 'share':
+      shareVideo(video);
+      break;
+    case 'report':
+    case 'open-report':
+      openReport(video);
+      break;
+    case 'close-modal':
+    case 'close-comments':
+      closeModals();
+      break;
+    case 'resolve-report':
+      resolveReport(element.dataset.reportId);
+      break;
+    case 'moderator-filter':
+      showToast('Kön är redan sorterad efter risk och ålder.');
+      break;
+    case 'search':
+      showToast('Sökning av kreatörer kommer med säkra konto- och åldersfilter.');
       break;
     default:
       break;
@@ -551,91 +456,92 @@ function handleAction(action) {
 }
 
 function bindEvents() {
-  $$('.nav-item[data-view]').forEach((item) => {
-    item.addEventListener('click', () => setView(item.dataset.view));
-  });
-
   document.addEventListener('click', (event) => {
-    const actionElement = event.target.closest('[data-action]');
-    if (actionElement) handleAction(actionElement.dataset.action);
+    const viewButton = event.target.closest('[data-view]');
+    if (viewButton) {
+      setView(viewButton.dataset.view);
+      return;
+    }
 
     const viewTarget = event.target.closest('[data-view-target]');
-    if (viewTarget) setView(viewTarget.dataset.viewTarget);
-
-    const locationElement = event.target.closest('[data-location-id]');
-    if (locationElement) selectLocation(locationElement.dataset.locationId);
-
-    const quickLink = event.target.closest('.quick-link[data-url]');
-    if (quickLink) openDestination(quickLink.dataset.url, quickLink.querySelector('strong')?.textContent || hostLabel(quickLink.dataset.url));
-
-    const result = event.target.closest('.result-item[data-url]');
-    if (result) openDestination(result.dataset.url, result.dataset.label || hostLabel(result.dataset.url));
-
-    const selectedServer = event.target.closest('#selected-server-trigger');
-    if (selectedServer) togglePicker();
-
-    if (!event.target.closest('#connection-card')) togglePicker(false);
-  });
-
-  $('#address-form').addEventListener('submit', (event) => {
-    event.preventDefault();
-    handleSearch($('#address-input').value);
-  });
-
-  $('#private-search-form')?.addEventListener('submit', handlePrivateSearchSubmit);
-  $('#bookmark-button').addEventListener('click', toggleBookmark);
-
-  $('#location-search').addEventListener('input', (event) => renderLocationGrid(event.target.value));
-
-  $$('.switch[data-setting]').forEach((button) => {
-    const isOn = Boolean(state.settings[button.dataset.setting]);
-    button.classList.toggle('is-on', isOn);
-    button.setAttribute('aria-label', `${settingLabel(button.dataset.setting)} ${isOn ? 'på' : 'av'}`);
-    button.addEventListener('click', () => toggleSetting(button));
-  });
-
-  $('#selected-server-trigger').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      togglePicker();
+    if (viewTarget) {
+      setView(viewTarget.dataset.viewTarget);
+      return;
     }
+
+    const feedTab = event.target.closest('[data-feed-tab]');
+    if (feedTab) {
+      state.feedTab = feedTab.dataset.feedTab;
+      $$('.feed-tab').forEach((tab) => tab.classList.toggle('is-active', tab === feedTab));
+      renderFeed();
+      showToast(state.feedTab === 'new' ? 'Nyaste videorna visas först.' : state.feedTab === 'following' ? 'Videor från dina valda kreatörer.' : 'Personligt, modererat flöde.');
+      return;
+    }
+
+    const actionElement = event.target.closest('[data-action]');
+    if (actionElement) {
+      handleAction(actionElement.dataset.action, actionElement);
+      return;
+    }
+
+    const safetySetting = event.target.closest('[data-safety-setting]');
+    if (safetySetting) toggleSafetySetting(safetySetting);
+  });
+
+  $('#report-form').addEventListener('submit', submitReport);
+  $('#comment-form').addEventListener('submit', addComment);
+  $('#video-file').addEventListener('change', handleUpload);
+  $('#create-form').addEventListener('submit', submitVideo);
+
+  const uploadZone = $('#upload-zone');
+  ['dragenter', 'dragover'].forEach((eventName) => uploadZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    uploadZone.classList.add('is-dragging');
+  }));
+  ['dragleave', 'drop'].forEach((eventName) => uploadZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    uploadZone.classList.remove('is-dragging');
+  }));
+  uploadZone.addEventListener('drop', (event) => {
+    const file = event.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('video/')) {
+      showToast('Välj en videofil, till exempel MP4 eller MOV.', 'warning');
+      return;
+    }
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    $('#video-file').files = transfer.files;
+    handleUpload({ target: { files: [file] } });
   });
 
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeModals();
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
-      setView('browser');
-      $('#private-search-input')?.focus();
+      showToast('Sökning av kreatörer kommer med säkra konto- och åldersfilter.');
     }
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'l') {
-      event.preventDefault();
-      setView('browser');
-      $('#address-input')?.focus();
-      $('#address-input')?.select();
-    }
-    if (event.key === 'Escape') togglePicker(false);
   });
 
+  $$('.modal-backdrop').forEach((backdrop) => backdrop.addEventListener('click', (event) => {
+    if (event.target === backdrop) closeModals();
+  }));
 }
 
-async function loadServerConfig() {
+async function init() {
+  renderFeed();
+  renderReports();
+  bindEvents();
+  loadReports();
+
   try {
     const response = await fetch('/api/config', { headers: { Accept: 'application/json' } });
-    if (!response.ok) return;
-    const config = await response.json();
-    if (config.onlineLocations) $('#locations-online-count').textContent = config.onlineLocations;
+    if (response.ok) {
+      const config = await response.json();
+      if (config.directMessages === false) document.body.dataset.directMessages = 'off';
+    }
   } catch (error) {
-    // The browser is intentionally usable even when the optional API is unavailable.
+    // The UI is intentionally functional without the optional API.
   }
-}
-
-function init() {
-  renderConnection();
-  renderPicker();
-  renderLocationGrid();
-  renderActivity();
-  bindEvents();
-  loadServerConfig();
 }
 
 document.addEventListener('DOMContentLoaded', init);
