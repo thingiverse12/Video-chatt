@@ -81,7 +81,45 @@ const state = {
   feedTab: 'for-you',
   reports: [],
   safety: { reports: true, comments: true },
+  uploadFile: null,
+  uploadObjectUrl: null,
+  hiddenVideoIds: new Set(),
+  blockedCreators: new Set(),
 };
+
+function readStoredValue(key, fallback) {
+  try {
+    const value = window.localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function storeValue(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    // Storage is optional: the current session remains usable without it.
+  }
+}
+
+const savedVideoState = readStoredValue('vy-video-state', {});
+videos.forEach((video) => {
+  const stored = savedVideoState[video.id];
+  if (!stored) return;
+  video.liked = Boolean(stored.liked);
+  video.saved = Boolean(stored.saved);
+  video.following = Boolean(stored.following);
+});
+
+function persistVideoState() {
+  storeValue('vy-video-state', Object.fromEntries(videos.map((video) => [video.id, {
+    liked: video.liked,
+    saved: video.saved,
+    following: video.following,
+  }])));
+}
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -137,13 +175,18 @@ function renderFeed() {
   const feed = $('#video-feed');
   if (!feed) return;
 
-  let orderedVideos = [...videos];
-  if (state.feedTab === 'new') orderedVideos.reverse();
+  let orderedVideos = videos.filter((video) => !state.hiddenVideoIds.has(video.id) && !state.blockedCreators.has(video.creator));
+  if (state.feedTab === 'new') orderedVideos = [...orderedVideos].reverse();
+
+  if (!orderedVideos.length) {
+    feed.innerHTML = `<div class="following-empty feed-empty"><div class="empty-orb">${icon('shield-alert', 'icon-lg')}</div><h3>Flödet är lugnt</h3><p>Du har dolt allt som visades här. Du kan återställa flödet när du vill.</p><button class="primary-button" type="button" data-action="reset-feed">Återställ flödet</button></div>`;
+    return;
+  }
 
   feed.innerHTML = orderedVideos.map((video, index) => `
     <article class="video-card ${index === 0 ? 'is-featured' : 'video-card--compact'}" data-video-id="${video.id}">
-      <div class="video-stage theme-${video.tone}" role="img" aria-label="Demo-video från ${escapeHtml(video.creator)}">
-        <div class="video-art"></div>
+      <div class="video-stage theme-${video.tone}${video.source ? ' has-video' : ''}" role="img" aria-label="Video från ${escapeHtml(video.creator)}">
+        ${video.source ? `<video class="uploaded-video" src="${escapeHtml(video.source)}" loop playsinline muted preload="metadata"></video>` : '<div class="video-art"></div>'}
         <div class="video-topline"><span class="content-pill"><i></i> ${escapeHtml(video.safeLabel)}</span><button class="video-menu" type="button" data-action="video-menu" aria-label="Fler alternativ">${icon('more')}</button></div>
         <button class="video-play" type="button" data-action="play" aria-label="Spela video">${icon('play')}</button>
         <div class="video-info">
@@ -187,27 +230,86 @@ function updateVideoControls(video) {
 function toggleLike(video) {
   video.liked = !video.liked;
   video.likes += video.liked ? 1 : -1;
+  persistVideoState();
   updateVideoControls(video);
   showToast(video.liked ? 'Gillad. Fint att visa stöd.' : 'Gilla borttagen.');
 }
 
 function toggleSave(video) {
   video.saved = !video.saved;
+  persistVideoState();
   updateVideoControls(video);
   showToast(video.saved ? 'Videon sparades privat.' : 'Videon togs bort från sparade.');
 }
 
 function toggleFollow(video) {
   video.following = !video.following;
+  persistVideoState();
   updateVideoControls(video);
   showToast(video.following ? `Du följer @${video.creator}.` : `Du följer inte längre @${video.creator}.`);
 }
 
 function togglePlayback(button) {
+  const stage = button.closest('.video-stage');
+  const uploadedVideo = stage?.querySelector('.uploaded-video');
   const isPlaying = button.classList.toggle('is-playing');
   button.innerHTML = icon(isPlaying ? 'pause' : 'play');
   button.setAttribute('aria-label', isPlaying ? 'Pausa video' : 'Spela video');
-  showToast(isPlaying ? 'Video spelas i demo-läge.' : 'Video pausad.');
+
+  if (uploadedVideo) {
+    if (isPlaying) {
+      uploadedVideo.play().catch(() => {
+        button.classList.remove('is-playing');
+        button.innerHTML = icon('play');
+        button.setAttribute('aria-label', 'Spela video');
+        showToast('Videon kunde inte spelas upp i den här webbläsaren.', 'warning');
+      });
+    } else {
+      uploadedVideo.pause();
+    }
+  }
+
+  const card = button.closest('.video-card');
+  card?.classList.toggle('is-playing', isPlaying);
+  showToast(isPlaying ? 'Video spelas.' : 'Video pausad.');
+}
+
+function toggleVideoMenu(button) {
+  const stage = button.closest('.video-stage');
+  if (!stage) return;
+  $$('.video-menu-popover').forEach((menu) => menu.remove());
+
+  const card = button.closest('[data-video-id]');
+  const video = getVideo(card?.dataset.videoId);
+  const menu = document.createElement('div');
+  menu.className = 'video-menu-popover';
+  menu.innerHTML = `
+    <button type="button" data-action="hide-video">${icon('close', 'icon-sm')} Dölj video</button>
+    <button type="button" data-action="block-creator">${icon('user', 'icon-sm')} Blockera @${escapeHtml(video.creator)}</button>
+    <button type="button" data-action="report">${icon('flag', 'icon-sm')} Rapportera</button>
+  `;
+  stage.appendChild(menu);
+}
+
+function hideVideo(video) {
+  state.hiddenVideoIds.add(video.id);
+  $$('.video-menu-popover').forEach((menu) => menu.remove());
+  renderFeed();
+  showToast('Videon har dolts från ditt flöde.');
+}
+
+function blockCreator(video) {
+  state.blockedCreators.add(video.creator);
+  $$('.video-menu-popover').forEach((menu) => menu.remove());
+  renderFeed();
+  showToast(`@${video.creator} har blockerats.`);
+}
+
+function resetFeed() {
+  state.hiddenVideoIds.clear();
+  state.blockedCreators.clear();
+  renderFeed();
+  showToast('Flödet är återställt.');
 }
 
 function renderComments(video) {
@@ -262,13 +364,14 @@ async function submitReport(event) {
 
   const payload = { videoId, reason, details: $('#report-details').value.trim() };
   try {
-    await fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const response = await fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error('report-failed');
+    closeModals();
+    showToast('Rapport skickad till moderatorerna. Tack för att du säger till.');
+    if (state.activeView === 'moderator') loadReports();
   } catch (error) {
-    // The prototype still confirms the safety action when the optional API is offline.
+    showToast('Rapporten kunde inte skickas. Kontrollera anslutningen och försök igen.', 'danger');
   }
-  closeModals();
-  showToast('Rapport skickad till moderatorerna. Tack för att du säger till.');
-  if (state.activeView === 'moderator') loadReports();
 }
 
 function addComment(event) {
@@ -277,7 +380,7 @@ function addComment(event) {
   const text = input.value.trim();
   if (!text) return;
 
-  if (isUnsafeComment(text)) {
+  if (state.safety.comments && isUnsafeComment(text)) {
     input.value = '';
     showToast('Kommentaren stoppades: kontaktuppgifter och kontaktförsök tillåts inte.', 'warning');
     return;
@@ -330,6 +433,7 @@ async function loadReports() {
 }
 
 async function resolveReport(id) {
+  if (!state.reports.length) state.reports = [...fallbackReports];
   const report = state.reports.find((entry) => entry.id === id);
   if (report) report.status = 'reviewed';
   try {
@@ -344,6 +448,20 @@ async function resolveReport(id) {
 function handleUpload(event) {
   const file = event.target.files?.[0];
   if (!file) return;
+  if (!file.type.startsWith('video/')) {
+    showToast('Välj en videofil, till exempel MP4 eller MOV.', 'warning');
+    event.target.value = '';
+    return;
+  }
+  if (file.size > 50 * 1024 * 1024) {
+    showToast('Videon är för stor. Prototypen tillåter högst 50 MB.', 'warning');
+    event.target.value = '';
+    return;
+  }
+
+  if (state.uploadObjectUrl) URL.revokeObjectURL(state.uploadObjectUrl);
+  state.uploadFile = file;
+  state.uploadObjectUrl = URL.createObjectURL(file);
   $('#upload-title').textContent = file.name;
   $('#upload-subtitle').textContent = `${Math.round(file.size / 1024 / 1024 * 10) / 10 || '< 0,1'} MB · redo för förhandsgranskning`;
   $('#upload-zone').classList.add('is-uploaded');
@@ -351,7 +469,8 @@ function handleUpload(event) {
 
 function submitVideo(event) {
   event.preventDefault();
-  if (!$('#video-file').files?.length) {
+  const file = state.uploadFile || $('#video-file').files?.[0];
+  if (!file) {
     showToast('Välj en video först.', 'warning');
     return;
   }
@@ -363,12 +482,39 @@ function submitVideo(event) {
     showToast('Aktivera borttagning av platsdata för att fortsätta säkert.', 'warning');
     return;
   }
-  showToast('Videon klarade förhandskontrollen i demo-läge.');
+
+  const publishedVideo = {
+    id: `local-${Date.now()}`,
+    creator: 'du',
+    initials: 'A',
+    creatorColor: '#b8f0d5',
+    verified: false,
+    title: file.name.replace(/\.[^/.]+$/, '') || 'Min nya video',
+    caption: 'Ny video från min VY-profil. ',
+    tags: ['#minvideo'],
+    sound: 'originalt ljud · du',
+    likes: 0,
+    commentsCount: 0,
+    shares: 0,
+    tone: 'mint',
+    safeLabel: 'Förhandsgranskad',
+    source: state.uploadObjectUrl,
+    comments: [],
+    liked: false,
+    saved: false,
+    following: false,
+  };
+  videos.unshift(publishedVideo);
+  state.activeVideoId = publishedVideo.id;
+  state.uploadFile = null;
+  state.uploadObjectUrl = null;
   $('#create-form').reset();
   $('#upload-title').textContent = 'Släpp en video här';
   $('#upload-subtitle').textContent = 'MP4 eller MOV · max 60 sekunder';
   $('#upload-zone').classList.remove('is-uploaded');
+  renderFeed();
   setView('feed');
+  showToast('Videon publicerades i ditt lokala VY-flöde.');
 }
 
 function toggleSafetySetting(button) {
@@ -410,7 +556,16 @@ function handleAction(action, element) {
       showToast('Tips: använd Rapportera om något känns fel — du behöver inte vara säker.');
       break;
     case 'video-menu':
-      showToast('Menyn innehåller rapportera, blockera och dölj.');
+      toggleVideoMenu(element);
+      break;
+    case 'hide-video':
+      hideVideo(video);
+      break;
+    case 'block-creator':
+      blockCreator(video);
+      break;
+    case 'reset-feed':
+      resetFeed();
       break;
     case 'play':
       togglePlayback(element);
@@ -457,6 +612,10 @@ function handleAction(action, element) {
 
 function bindEvents() {
   document.addEventListener('click', (event) => {
+    if (!event.target.closest('.video-menu, .video-menu-popover')) {
+      $$('.video-menu-popover').forEach((menu) => menu.remove());
+    }
+
     const viewButton = event.target.closest('[data-view]');
     if (viewButton) {
       setView(viewButton.dataset.view);
@@ -544,4 +703,15 @@ async function init() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+let hasInitialized = false;
+function boot() {
+  if (hasInitialized) return;
+  hasInitialized = true;
+  init();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot, { once: true });
+} else {
+  boot();
+}
