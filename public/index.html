@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101217" />
+    <meta name="description" content="VY — ett kortvideo-flöde byggt med trygghet först." />
+    <title>VY — Tryggt kortvideo-flöde</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <svg class="svg-sprite" aria-hidden="true" focusable="false">
+      <symbol id="icon-vy" viewBox="0 0 24 24">
+        <path d="M4 5.5 10.1 18c.7 1.4 2.9 1.4 3.6 0L20 5.5" />
+        <path d="M7.2 5.5h9.6" />
+      </symbol>
+      <symbol id="icon-home" viewBox="0 0 24 24">
+        <path d="m3.5 10.5 8.5-7 8.5 7v9a1.5 1.5 0 0 1-1.5 1.5h-14A1.5 1.5 0 0 1 3.5 19.5v-9Z" />
+        <path d="M9 21v-6h6v6" />
+      </symbol>
+      <symbol id="icon-users" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3.5 20c.5-3.2 2.3-5 5.5-5s5 1.8 5.5 5M16 5.5a3 3 0 0 1 0 5.8M16.5 15c2.2.2 3.5 1.8 4 4" />
+      </symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24">
+        <path d="M12 3 19 6v5.4c0 4.4-2.9 7.8-7 9.6-4.1-1.8-7-5.2-7-9.6V6l7-3Z" />
+        <path d="m9 12 2 2 4-4" />
+      </symbol>
+      <symbol id="icon-shield-alert" viewBox="0 0 24 24">
+        <path d="M12 3 19 6v5.4c0 4.4-2.9 7.8-7 9.6-4.1-1.8-7-5.2-7-9.6V6l7-3Z" />
+        <path d="M12 8v4M12 15.5h.01" />
+      </symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <circle cx="10.8" cy="10.8" r="6.8" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="icon-bell" viewBox="0 0 24 24">
+        <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
+      </symbol>
+      <symbol id="icon-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2.5V20a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H6v-2.5h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V5h2.5v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2.5h-.2a1.7 1.7 0 0 0-1.6 1Z" />
+      </symbol>
+      <symbol id="icon-flag" viewBox="0 0 24 24">
+        <path d="M5 21V4M5 5c4-3 7 3 14 0v9c-7 3-10-3-14 0" />
+      </symbol>
+      <symbol id="icon-help" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-.9.9-1.9 1.2-1.9 2.7M12 16.8h.01" />
+      </symbol>
+      <symbol id="icon-more" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+        <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
+      </symbol>
+      <symbol id="icon-heart" viewBox="0 0 24 24">
+        <path d="M20.8 8.8c0 5.2-8.8 10.3-8.8 10.3S3.2 14 3.2 8.8A4.5 4.5 0 0 1 12 6.4a4.5 4.5 0 0 1 8.8 2.4Z" />
+      </symbol>
+      <symbol id="icon-message" viewBox="0 0 24 24">
+        <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.7 8.7 0 0 1-3-.5L4 20l1.5-4.3A7.2 7.2 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z" />
+      </symbol>
+      <symbol id="icon-bookmark" viewBox="0 0 24 24">
+        <path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.7L6 21V4.5Z" />
+      </symbol>
+      <symbol id="icon-share" viewBox="0 0 24 24">
+        <circle cx="18" cy="5" r="2.5" />
+        <circle cx="6" cy="12" r="2.5" />
+        <circle cx="18" cy="19" r="2.5" />
+        <path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4" />
+      </symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24">
+        <path d="m9 5 10 7-10 7V5Z" fill="currentColor" stroke="none" />
+      </symbol>
+      <symbol id="icon-pause" viewBox="0 0 24 24">
+        <path d="M8 5v14M16 5v14" />
+      </symbol>
+      <symbol id="icon-volume" viewBox="0 0 24 24">
+        <path d="M4 10v4h3l4 3V7l-4 3H4ZM15 9.5a4 4 0 0 1 0 5M17.5 7a7.5 7.5 0 0 1 0 10" />
+      </symbol>
+      <symbol id="icon-music" viewBox="0 0 24 24">
+        <path d="M9 18V5l10-2v13M9 9l10-2" />
+        <ellipse cx="6.5" cy="18" rx="2.5" ry="2" />
+        <ellipse cx="16.5" cy="16" rx="2.5" ry="2" />
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path d="m5 12 4.2 4.2L19 6.5" />
+      </symbol>
+      <symbol id="icon-lock" viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="10" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" />
+      </symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M12 16V4M7.5 8.5 12 4l4.5 4.5M5 16v3h14v-3" />
+      </symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24">
+        <rect x="3.5" y="4" width="17" height="16" rx="2" />
+        <circle cx="8.5" cy="9" r="1.5" />
+        <path d="m4 17 4.5-4 3.5 3 2.5-2 5 4" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </symbol>
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24">
+        <path d="m9 6 6 6-6 6" />
+      </symbol>
+      <symbol id="icon-chevron-down" viewBox="0 0 24 24">
+        <path d="m6 9 6 6 6-6" />
+      </symbol>
+      <symbol id="icon-alert" viewBox="0 0 24 24">
+        <path d="m12 3 9 17H3L12 3Z" />
+        <path d="M12 9v4M12 17h.01" />
+      </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="3.2" />
+        <path d="M5 20c.7-3.7 3-5.5 7-5.5s6.3 1.8 7 5.5" />
+      </symbol>
+      <symbol id="icon-filter" viewBox="0 0 24 24">
+        <path d="M4 6h16M7 12h10M10 18h4" />
+      </symbol>
+      <symbol id="icon-external" viewBox="0 0 24 24">
+        <path d="M14 4h6v6M20 4l-9 9" />
+        <path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="left-rail" aria-label="Huvudmeny">
+        <a class="brand" href="#" data-action="go-feed" aria-label="VY startsida">
+          <span class="brand-mark"><svg class="icon"><use href="#icon-vy"></use></svg></span>
+          <span><strong>VY</strong><small>TRYGGT FLÖDE</small></span>
+        </a>
+
+        <div class="rail-label">UPPTÄCK</div>
+        <nav class="main-nav">
+          <button class="nav-item is-active" type="button" data-view="feed">
+            <svg class="icon"><use href="#icon-home"></use></svg><span>För dig</span>
+          </button>
+          <button class="nav-item" type="button" data-view="following">
+            <svg class="icon"><use href="#icon-users"></use></svg><span>Följer</span>
+          </button>
+          <button class="nav-item nav-item--create" type="button" data-view="create">
+            <span class="nav-create-icon"><svg class="icon icon-sm"><use href="#icon-plus"></use></svg></span><span>Skapa</span>
+          </button>
+        </nav>
+
+        <div class="rail-label rail-label--later">TRYGGHET</div>
+        <nav class="main-nav">
+          <button class="nav-item" type="button" data-view="safety">
+            <svg class="icon"><use href="#icon-shield"></use></svg><span>Säkerhet</span><span class="nav-dot"></span>
+          </button>
+          <button class="nav-item" type="button" data-view="moderator">
+            <svg class="icon"><use href="#icon-flag"></use></svg><span>Moderatorvy</span><span class="beta-tag">BETA</span>
+          </button>
+        </nav>
+
+        <div class="rail-spacer"></div>
+        <div class="rail-policy">
+          <div class="policy-icon"><svg class="icon icon-sm"><use href="#icon-lock"></use></svg></div>
+          <div><strong>13+ som standard</strong><span>Inga DM i första versionen.</span></div>
+        </div>
+        <div class="profile-mini">
+          <div class="profile-avatar">A</div>
+          <div><strong>Alex</strong><span>13–17 · trygg profil</span></div>
+          <button class="icon-button icon-button--rail" type="button" data-action="profile-menu" aria-label="Profilmeny"><svg class="icon icon-sm"><use href="#icon-more"></use></svg></button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="mobile-brand"><span class="brand-mark"><svg class="icon"><use href="#icon-vy"></use></svg></span><strong>VY</strong></div>
+          <div class="topbar-title"><span class="topbar-kicker">TRYGGT KORTVIDEO</span><h1 id="page-title">För dig</h1></div>
+          <div class="topbar-actions">
+            <div class="age-badge"><span class="age-dot"></span> 13+</div>
+            <button class="topbar-icon" type="button" data-action="search" aria-label="Sök"><svg class="icon"><use href="#icon-search"></use></svg></button>
+            <button class="topbar-icon has-notification" type="button" data-action="notifications" aria-label="Aviseringar"><svg class="icon"><use href="#icon-bell"></use></svg><i></i></button>
+            <button class="topbar-avatar" type="button" data-action="profile-menu" aria-label="Öppna profil">A</button>
+          </div>
+        </header>
+
+        <div class="mobile-safety-strip"><svg class="icon icon-sm"><use href="#icon-shield"></use></svg><span><strong>Trygghetsläge aktivt</strong> · DM är avstängt i MVP</span><button type="button" data-view-target="safety">Läs mer</button></div>
+
+        <div class="view-container">
+          <section class="app-view is-visible" id="view-feed" data-view-panel="feed">
+            <div class="feed-toolbar">
+              <div class="feed-tabs" role="tablist" aria-label="Flöden">
+                <button class="feed-tab is-active" type="button" data-feed-tab="for-you">För dig</button>
+                <button class="feed-tab" type="button" data-feed-tab="following">Följer</button>
+                <button class="feed-tab" type="button" data-feed-tab="new">Nyast</button>
+              </div>
+              <div class="feed-status"><span class="live-pulse"></span> Modererat flöde</div>
+            </div>
+            <div class="video-feed" id="video-feed" aria-live="polite"></div>
+          </section>
+
+          <section class="app-view" id="view-following" data-view-panel="following">
+            <div class="page-heading-block"><span class="section-kicker">DINA SKAPARE</span><h2>Följer</h2><p>Videor från personer och kreatörer du själv har valt.</p></div>
+            <div class="following-empty"><div class="empty-orb"><svg class="icon icon-lg"><use href="#icon-users"></use></svg></div><h3>Bygg ditt flöde i lugn takt</h3><p>Följ kreatörer du gillar. VY visar aldrig kontaktförslag till minderåriga baserat på plats eller privata uppgifter.</p><button class="primary-button" type="button" data-view-target="feed">Utforska videor <svg class="icon icon-sm"><use href="#icon-chevron-right"></use></svg></button></div>
+          </section>
+
+          <section class="app-view" id="view-create" data-view-panel="create">
+            <div class="page-heading-block"><span class="section-kicker">SKAPA MED KONTROLL</span><h2>Ny video</h2><p>Du äger ditt innehåll. VY visar alltid vad som händer innan publicering.</p></div>
+            <form class="create-card" id="create-form">
+              <label class="upload-zone" for="video-file" id="upload-zone"><input id="video-file" type="file" accept="video/*" /><span class="upload-symbol"><svg class="icon icon-lg"><use href="#icon-upload"></use></svg></span><strong id="upload-title">Släpp en video här</strong><span id="upload-subtitle">MP4 eller MOV · max 60 sekunder</span><span class="upload-button">Välj fil</span></label>
+              <div class="create-options">
+                <label class="check-row"><input type="checkbox" id="no-location" checked /><span class="fake-check"><svg class="icon icon-xs"><use href="#icon-check"></use></svg></span><span><strong>Ta bort platsdata</strong><small>VY publicerar inte GPS eller hemadress.</small></span></label>
+                <label class="check-row"><input type="checkbox" id="confirm-rights" /><span class="fake-check"><svg class="icon icon-xs"><use href="#icon-check"></use></svg></span><span><strong>Jag har rätt att publicera materialet</strong><small>Du behöver samtycke till personer som syns i videon.</small></span></label>
+              </div>
+              <div class="create-footer"><span><svg class="icon icon-sm"><use href="#icon-shield"></use></svg> Förhandsgranskas av säkerhetsfilter</span><button class="primary-button" type="submit">Förhandsgranska <svg class="icon icon-sm"><use href="#icon-chevron-right"></use></svg></button></div>
+            </form>
+          </section>
+
+          <section class="app-view" id="view-safety" data-view-panel="safety">
+            <div class="page-heading-block"><span class="section-kicker">SÄKERHETSCENTER</span><h2>Trygghet först</h2><p>Skydden är aktiva innan du börjar titta, kommentera eller skapa.</p></div>
+            <div class="safety-overview"><div class="safety-score"><div class="safety-score-ring">92</div><div><span>DIN SKYDDSNIVÅ</span><strong>Stark</strong><small>Senast kontrollerad nu</small></div></div><div class="safety-active"><span class="live-pulse"></span><strong>4 av 4 skydd aktiva</strong><small>Du kan ändra när som helst</small></div></div>
+            <div class="safety-settings">
+              <div class="setting-row"><div class="setting-icon setting-icon--green"><svg class="icon"><use href="#icon-lock"></use></svg></div><div><strong>Direktmeddelanden</strong><span>Avstängt i MVP för att minska oönskad kontakt.</span></div><span class="setting-state">Av</span></div>
+              <div class="setting-row"><div class="setting-icon setting-icon--purple"><svg class="icon"><use href="#icon-flag"></use></svg></div><div><strong>Snabb rapportering</strong><span>Rapporter går till utbildade moderatorer med prioritering.</span></div><button class="small-switch is-on" type="button" data-safety-setting="reports" aria-label="Snabb rapportering aktiv"><span></span></button></div>
+              <div class="setting-row"><div class="setting-icon setting-icon--orange"><svg class="icon"><use href="#icon-message"></use></svg></div><div><strong>Kommentarfilter</strong><span>Blockerar kontaktuppgifter, externa länkar och riskfraser.</span></div><button class="small-switch is-on" type="button" data-safety-setting="comments" aria-label="Kommentarfilter aktiv"><span></span></button></div>
+              <div class="setting-row"><div class="setting-icon setting-icon--blue"><svg class="icon"><use href="#icon-user"></use></svg></div><div><strong>Åldersanpassat innehåll</strong><span>Rekommendationer anpassas efter åldersgrupp, inte plats.</span></div><span class="setting-state setting-state--green">På</span></div>
+            </div>
+            <div class="legal-note"><div class="legal-note-icon"><svg class="icon"><use href="#icon-alert"></use></svg></div><div><strong>Juridisk checklista behövs före lansering</strong><p>Detta är ett produktförslag, inte juridisk rådgivning. GDPR, DSA, åldersgränser, samtycke, radering och rapportering måste granskas med jurist och barnsäkerhetsexpert.</p></div></div>
+          </section>
+
+          <section class="app-view" id="view-moderator" data-view-panel="moderator">
+            <div class="page-heading-block page-heading-block--row"><div><span class="section-kicker">INTERN VERKTYGSVY</span><h2>Moderatorcenter</h2><p>Prioritera rapporter och lämna spårbar åtgärdshistorik.</p></div><div class="moderator-role"><span class="role-dot"></span> Demo-moderator</div></div>
+            <div class="moderator-stats"><div><span>NYA RAPPORTER</span><strong id="new-report-count">3</strong><small>+1 sedan igår</small></div><div><span>SVARSTID</span><strong>18<span>m</span></strong><small>Mål under 30 min</small></div><div><span>ÅTGÄRDADE</span><strong>97<span>%</span></strong><small>Den här veckan</small></div></div>
+            <div class="moderation-card"><div class="moderation-header"><div><h3>Prioriterad kö</h3><span>Sorterad efter risk och ålder</span></div><button class="filter-button" type="button" data-action="moderator-filter"><svg class="icon icon-sm"><use href="#icon-filter"></use></svg> Filter</button></div><div class="report-list" id="report-list"></div></div>
+            <div class="moderator-note"><svg class="icon icon-sm"><use href="#icon-lock"></use></svg><span>Endast behöriga moderatorer ska se rapportdetaljer. Alla beslut ska loggas och kunna överklagas.</span></div>
+          </section>
+        </div>
+      </main>
+
+      <aside class="right-panel" aria-label="VY trygghetscenter">
+        <div class="right-panel-header"><span class="section-kicker">VY-GARANTIER</span><button class="topbar-icon" type="button" data-action="help" aria-label="Hjälp"><svg class="icon"><use href="#icon-help"></use></svg></button></div>
+        <div class="safety-hero"><div class="safety-hero-top"><div class="shield-badge"><svg class="icon"><use href="#icon-shield"></use></svg></div><span class="active-label"><i></i> AKTIVT</span></div><h2>Trygghet är<br /><em>inbyggt.</em></h2><p>VY är skapat för att unga ska kunna upptäcka och skapa utan oönskad vuxenkontakt.</p><button type="button" class="outline-button" data-view-target="safety">Se alla skydd <svg class="icon icon-xs"><use href="#icon-chevron-right"></use></svg></button></div>
+        <div class="guardrail-card"><div class="guardrail-heading"><span>SKYDD I MVP</span><span class="guardrail-count">04</span></div><div class="guardrail-row"><span class="guardrail-check"><svg class="icon icon-xs"><use href="#icon-check"></use></svg></span><span>Inga direktmeddelanden</span></div><div class="guardrail-row"><span class="guardrail-check"><svg class="icon icon-xs"><use href="#icon-check"></use></svg></span><span>Rapportera och blockera</span></div><div class="guardrail-row"><span class="guardrail-check"><svg class="icon icon-xs"><use href="#icon-check"></use></svg></span><span>Åldersanpassat flöde</span></div><div class="guardrail-row"><span class="guardrail-check"><svg class="icon icon-xs"><use href="#icon-check"></use></svg></span><span>Moderatorlogg</span></div></div>
+        <div class="report-card"><div class="report-card-icon"><svg class="icon"><use href="#icon-flag"></use></svg></div><div><strong>Något känns fel?</strong><p>Rapportera innehåll eller kontaktförsök. Du behöver aldrig förklara allt.</p><button type="button" data-action="open-report">Rapportera tryggt <svg class="icon icon-xs"><use href="#icon-chevron-right"></use></svg></button></div></div>
+        <div class="right-panel-footer"><span>VY / VERSION 0.1</span><span>PROTOTYP · EJ FÖR LANSERING</span></div>
+      </aside>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Mobilmeny">
+      <button class="mobile-nav-item is-active" type="button" data-view="feed"><svg class="icon"><use href="#icon-home"></use></svg><span>För dig</span></button>
+      <button class="mobile-nav-item" type="button" data-view="following"><svg class="icon"><use href="#icon-users"></use></svg><span>Följer</span></button>
+      <button class="mobile-create" type="button" data-view="create"><svg class="icon"><use href="#icon-plus"></use></svg></button>
+      <button class="mobile-nav-item" type="button" data-view="safety"><svg class="icon"><use href="#icon-shield"></use></svg><span>Skydd</span></button>
+      <button class="mobile-nav-item" type="button" data-view="moderator"><svg class="icon"><use href="#icon-flag"></use></svg><span>Mod</span></button>
+    </nav>
+
+    <div class="modal-backdrop" id="report-modal" hidden>
+      <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="report-title">
+        <button class="modal-close" type="button" data-action="close-modal" aria-label="Stäng"><svg class="icon"><use href="#icon-close"></use></svg></button>
+        <div class="modal-icon modal-icon--red"><svg class="icon icon-lg"><use href="#icon-flag"></use></svg></div>
+        <span class="section-kicker">TRYGG RAPPORT</span><h2 id="report-title">Rapportera innehåll</h2><p class="modal-copy" id="report-subtitle">Din rapport går till VY:s moderatorer. Du kan vara anonym i prototypen.</p>
+        <form id="report-form"><input type="hidden" id="report-video-id" /><label class="form-label" for="report-reason">Vad gäller rapporten?</label><select id="report-reason" required><option value="">Välj anledning</option><option>Olämplig kontakt</option><option>Sexuellt eller exploaterande innehåll</option><option>Hot, hat eller mobbning</option><option>Farlig utmaning eller självskada</option><option>Annat som känns fel</option></select><label class="form-label" for="report-details">Kort beskrivning <span>(valfritt)</span></label><textarea id="report-details" rows="3" maxlength="500" placeholder="Berätta bara det du känner dig trygg med."></textarea><div class="modal-actions"><button class="ghost-button" type="button" data-action="close-modal">Avbryt</button><button class="danger-button" type="submit">Skicka rapport <svg class="icon icon-sm"><use href="#icon-flag"></use></svg></button></div></form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="comments-modal" hidden>
+      <section class="modal-card comments-card" role="dialog" aria-modal="true" aria-labelledby="comments-title">
+        <button class="modal-close" type="button" data-action="close-comments" aria-label="Stäng"><svg class="icon"><use href="#icon-close"></use></svg></button>
+        <span class="section-kicker">KOMMENTARER</span><h2 id="comments-title">Säg något snällt</h2><p class="modal-copy">Kontaktuppgifter och externa länkar blockeras automatiskt.</p>
+        <div class="comments-list" id="comments-list"></div>
+        <form class="comment-form" id="comment-form"><input id="comment-input" maxlength="180" placeholder="Skriv en kommentar…" autocomplete="off" /><button class="comment-submit" type="submit" aria-label="Skicka kommentar"><svg class="icon icon-sm"><use href="#icon-chevron-right"></use></svg></button></form>
+      </section>
+    </div>
+
+    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+    <script src="/client.js" defer></script>
+  </body>
+</html>
