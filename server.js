@@ -44,6 +44,61 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, service: 'vy-safe-short-video' });
 });
 
+// VY-Gen: VY:s helt egna AI. Egen transformer-arkitektur, tränad från
+// grunden i sandboxen — ingen extern API. Modellen laddas en gång i
+// minnet; inferensen körs i denna process (ai/vygen-node.js).
+let vygen = null;
+let vygenLoadError = null;
+try {
+  const { loadModel } = require('./ai/vygen-node');
+  vygen = loadModel(path.join(__dirname, 'ai', 'dist', 'vygen.bin'));
+  console.log('VY-Gen klar:', vygen.nLayers, 'lager,', vygen.d, 'bredd, ~', (vygen.config.ctx), 'tecken kontext');
+} catch (error) {
+  vygenLoadError = error.message;
+  console.warn('VY-Gen kunde inte laddas:', error.message);
+}
+
+app.get('/api/ai/status', (req, res) => {
+  if (!vygen) {
+    return res.json({ ready: false, name: 'VY-Gen', error: vygenLoadError });
+  }
+  let info = {};
+  try {
+    info = JSON.parse(require('fs').readFileSync(path.join(__dirname, 'ai', 'dist', 'model-info.json'), 'utf-8'));
+  } catch (error) {
+    info = {};
+  }
+  const { params, trainedChars } = info;
+  res.json({
+    ready: true,
+    name: 'VY-Gen',
+    params,
+    trainedChars,
+    ctx: vygen.config.ctx,
+    dModel: vygen.config.d_model,
+    layers: vygen.config.nLayers,
+  });
+});
+
+app.post('/api/ai/chat', (req, res) => {
+  if (!vygen) {
+    return res.status(503).json({ error: 'VY-Gen är inte redo ännu — modellen tränas.' });
+  }
+  const message = typeof req.body?.message === 'string' ? req.body.message.slice(0, 300) : '';
+  if (!message.trim()) {
+    return res.status(400).json({ error: 'Skriv ett meddelande till VY-Gen.' });
+  }
+  const startedAt = Date.now();
+  let reply;
+  try {
+    reply = require('./ai/vygen-node').chat(vygen, message);
+  } catch (error) {
+    console.error('VY-Gen inferens misslyckades:', error);
+    return res.status(500).json({ error: 'VY-Gen fastnade. Prova igen.' });
+  }
+  return res.json({ reply, ms: Date.now() - startedAt });
+});
+
 app.get('/api/moderation/reports', (req, res) => {
   res.json(reports);
 });

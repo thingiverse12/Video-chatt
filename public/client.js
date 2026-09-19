@@ -148,7 +148,7 @@ function formatCount(value) {
 }
 
 function setView(view) {
-  const allowedViews = ['feed', 'following', 'create', 'safety', 'moderator'];
+  const allowedViews = ['feed', 'following', 'create', 'safety', 'moderator', 'ai'];
   if (!allowedViews.includes(view)) return;
 
   state.activeView = view;
@@ -165,10 +165,114 @@ function setView(view) {
     create: 'Ny video',
     safety: 'Trygghet först',
     moderator: 'Moderatorcenter',
+    ai: 'VY-Gen · egen AI',
   };
   $('#page-title').textContent = titles[view];
   if (view === 'moderator') renderReports();
+  if (view === 'ai') startAiChat();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ===== VY-Gen — VY:s helt egna AI (egna modell, ingen extern API) ===== */
+let aiBusy = false;
+let aiStarted = false;
+
+function addAiMessage(role, text) {
+  const log = $('#ai-chat-log');
+  if (!log) return null;
+  const msg = document.createElement('div');
+  if (role === 'vy') {
+    msg.className = 'ai-msg ai-msg--vy';
+    msg.innerHTML = `<span class="ai-msg-name">VY-GEN</span>${escapeHtml(text)}`;
+  } else {
+    msg.className = 'ai-msg ai-msg--user';
+    msg.textContent = text;
+  }
+  log.appendChild(msg);
+  log.scrollTop = log.scrollHeight;
+  return msg;
+}
+
+function showAiTyping() {
+  const log = $('#ai-chat-log');
+  if (!log) return;
+  const msg = document.createElement('div');
+  msg.className = 'ai-msg ai-msg--vy';
+  msg.id = 'ai-typing-msg';
+  msg.innerHTML = '<span class="ai-msg-name">VY-GEN</span><span class="ai-typing"><i></i><i></i><i></i></span>';
+  log.appendChild(msg);
+  log.scrollTop = log.scrollHeight;
+}
+
+function hideAiTyping() {
+  const el = $('#ai-typing-msg');
+  if (el) el.remove();
+}
+
+async function submitAiChat(event) {
+  if (event) event.preventDefault();
+  const input = $('#ai-chat-input');
+  const message = (input?.value || '').trim();
+  if (!message || aiBusy) return;
+  aiBusy = true;
+  input.value = '';
+  const sendButton = $('#ai-chat-form')?.querySelector('button');
+  if (sendButton) sendButton.disabled = true;
+  addAiMessage('user', message);
+  showAiTyping();
+  try {
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    const data = await response.json();
+    hideAiTyping();
+    if (!response.ok) addAiMessage('vy', data.error || 'Jag blev inte klar riktigt. Prova igen om en liten stund.');
+    else addAiMessage('vy', data.reply);
+  } catch (error) {
+    hideAiTyping();
+    addAiMessage('vy', 'Jag kunde inte nå servern. Kolla att VY körs.');
+  } finally {
+    aiBusy = false;
+    if (sendButton) sendButton.disabled = false;
+  }
+}
+
+function startAiChat() {
+  if (aiStarted) return;
+  aiStarted = true;
+  addAiMessage('vy', 'Hej! Jag är VY-Gen — VY:s allra egna AI. Jag är en liten språkmodell som byggts och tränats helt i VY:s egen server, utan någon extern API. Ställ en fråga, eller testa en av knapparna.');
+  loadAiStatus();
+}
+
+function formatMiljont(value) {
+  if (value >= 1e6) return `${(value / 1e6).toFixed(1).replace('.', ',')} M`;
+  if (value >= 1e3) return `${Math.round(value / 1e3)}k`;
+  return String(value);
+}
+
+async function loadAiStatus() {
+  const strip = $('#ai-model-strip');
+  const statusText = $('#ai-status-text');
+  try {
+    const response = await fetch('/api/ai/status', { headers: { Accept: 'application/json' } });
+    if (!response.ok || !strip) return;
+    const data = await response.json();
+    if (!data.ready) {
+      strip.innerHTML = '<span class="ai-fact">VY-Gen tränas fortfarande i sandboxen. Kom tillbaka om ett tag.</span>';
+      if (statusText) statusText.textContent = 'tränas …';
+      return;
+    }
+    strip.innerHTML = [
+      `<span class="ai-fact">${icon('sparkle')}<span><strong>${formatMiljont(data.params)}</strong> parametrar</span></span>`,
+      `<span class="ai-fact">${icon('bookmark')}<span>tränad på <strong>${formatMiljont(data.trainedChars)}</strong> tecken</span></span>`,
+      `<span class="ai-fact">${icon('lock')}<span>egen transformer · <strong>ingen extern API</strong></span></span>`,
+    ].join('');
+    if (statusText) statusText.textContent = `kör på VY:s server · ${data.name}`;
+  } catch (error) {
+    // UI:en fungerar utan statusen.
+  }
 }
 
 function renderFeed() {
@@ -645,6 +749,17 @@ function bindEvents() {
 
     const safetySetting = event.target.closest('[data-safety-setting]');
     if (safetySetting) toggleSafetySetting(safetySetting);
+  });
+
+  const aiForm = $('#ai-chat-form');
+  if (aiForm) aiForm.addEventListener('submit', submitAiChat);
+  document.addEventListener('click', (event) => {
+    const chip = event.target.closest('[data-ai-chip]');
+    if (chip) {
+      const input = $('#ai-chat-input');
+      if (input) input.value = chip.dataset.aiChip;
+      submitAiChat();
+    }
   });
 
   $('#report-form').addEventListener('submit', submitReport);

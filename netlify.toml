@@ -1,0 +1,16 @@
+# VY på Netlify: statisk frontend + serverless functions.
+# AI-modellen (vygen.bin) sitter i functions/ai-model och laddas i
+# /api/ai/chat-funktionen vid cold start.
+[build]
+  publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+  # Ingen bundling: funktionerna har noll npm-beroenden och behöver ladda
+  # den binära modellfilen via fs — "none" behåller __dirname som det är.
+  node_bundler = "none"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

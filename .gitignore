@@ -1,3 +1,13 @@
 node_modules/
 .DS_Store
 npm-debug.log*
+.venv/
+ai/dist/vygen.pt
+ai/__pycache__/
+__pycache__/
+ai/corpus/korpus_sv.txt
+ai/corpus/books_sv.txt
+.netlify/
+agent/
+netlify/functions/api/ai/vygen.bin
+netlify/functions/api/ai/model-info.json

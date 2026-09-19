@@ -1,0 +1,455 @@
+ANVÄNDARE: hej VY-Gen
+VY-GEN: Hej! Vad vill du veta?
+
+ANVÄNDARE: berätta en fakta
+VY-GEN: Hajar finns i havet sedan mycket längre tid än dinosaurus.
+
+ANVÄNDARE: berätta en till
+VY-GEN: En ljusår är sträckan ljuset hinner på ett år.
+
+ANVÄNDARE: säg en rolig fakta
+VY-GEN: Råkor slår i snitt hela jorden på två timmar.
+
+ANVÄNDARE: vad är huvudstaden i Sverige
+VY-GEN: Huvudstaden är Stockholm.
+
+ANVÄNDARE: var ligger Stockholm
+VY-GEN: Stockholm ligger vid Östersjön där sjöar möter hav.
+
+ANVÄNDARE: vad är den största staden i Sverige
+VY-GEN: Stockholm är Sveriges största stad.
+
+ANVÄNDARE: vilka är Sveriges tre största städer
+VY-GEN: Stockholm, Göteborg och Malmö är Sveriges tre största städer.
+
+ANVÄNDARE: vad ligger Göteborg vid
+VY-GEN: Göteborg ligger vid västkusten, vid Göta ävens utlopp.
+
+ANVÄNDARE: vad är Malmö känt för
+VY-GEN: Malmö är känt för Limhamn, Tornet och att det är Sveriges sydligaste storstad.
+
+ANVÄNDARE: vad heter Sverige på engelska
+VY-GEN: Sverige heter Sweden på engelska.
+
+ANVÄNDARE: vad heter svenskarna på engelska
+VY-GEN: Svenskar heter Swedes på engelska.
+
+ANVÄNDARE: vilka gränser har Sverige
+VY-GEN: Sverige gränsar till Norge, Finland och Östersjön.
+
+ANVÄNDARE: vad är Sverige byggt av för landskap
+VY-GEN: Sverige har skogar, sjöar, skärgård och fjäll i norr.
+
+ANVÄNDARE: vad är nordkap
+VY-GEN: Nordkap är Europas nordspets, ligger i Norge.
+
+ANVÄNDARE: varför är Sverige så kallt i norr
+VY-GEN: I norr är det högre latitude och kallare luft från polen.
+
+ANVÄNDARE: vad är midnattssol
+VY-GEN: Midnattssol är solen som inte går ner på sommaren.
+
+ANVÄNDARE: varför finns midnattssol
+VY-GEN: Jorden lutar, så i norr skiner solen ända på sommaren.
+
+ANVÄNDARE: vad är polarnatt
+VY-GEN: Polarnatt är natten som inte tar slut på vintern.
+
+ANVÄNDARE: vad är den svenska flaggan
+VY-GEN: Den svenska flaggan är blå med ett gult kors.
+
+ANVÄNDARE: varför är den svenska flaggan blå och gul
+VY-GEN: Blått för havet och gult för skörden.
+
+ANVÄNDARE: när firar vi midsommar
+VY-GEN: Midsommar firas i juni, närmast 21 juni.
+
+ANVÄNDARE: vad gör man på midsommar
+VY-GEN: Man sätter upp mast, sjunger, dansar polka och äter sill.
+
+ANVÄNDARE: vad är en semla
+VY-GEN: En semla är ett mjukt bröd med fyllning, typiskt i fasen.
+
+ANVÄNDARE: vad smakar en korv
+VY-GEN: En korv är salt och kryddad, oftast med bröd och ketchup.
+
+ANVÄNDARE: vad äter vi på tomt
+VY-GEN: Vi äter pepparkakor på julafton.
+
+ANVÄNDARE: vem är tomtar
+VY-GEN: Tomtar är gubbar i röda hattar som bjuder på påsar till barnen.
+
+ANVÄNDARE: varför tänder vi ljus i december
+VY-GEN: I december är det mörkt, så ljus ger värme och stämning.
+
+ANVÄNDARE: vad är en lucia
+VY-GEN: Lucia är en tradition med vitt klädd och ljus cirka 13 december.
+
+ANVÄNDARE: vad är krans
+VY-GEN: En krans är en ring av ljus eller blommor, ofta på lucia.
+
+ANVÄNDARE: vad heter den svenska valutamönen
+VY-GEN: Den svenska valutamönen heter krona.
+
+ANVÄNDARE: vad är en öre
+VY-GEN: En öre är en hundradel av en krona.
+
+ANVÄNDARE: vem är kungen i Sverige
+VY-GEN: Sveriges nuvarande kung är Carl XVI Gustaf.
+
+ANVÄNDARE: var bor kungen
+VY-GEN: Kungen bor i Slottet i Stockholm.
+
+ANVÄNDARE: vad är det svenska riksdagen
+VY-GEN: Riksdagen är Sveriges lagstiftande församling.
+
+ANVÄNDARE: vem skriver lagar i Sverige
+VY-GEN: Riksdagen skriver lagar i Sverige.
+
+ANVÄNDARE: vad är grundlagen
+VY-GEN: Grundlagen är de viktigaste lagarna som styr landet.
+
+ANVÄNDARE: varför har vi en grundlag
+VY-GEN: För att skydda rättigheter och styra makten.
+
+ANVÄNDARE: vad är en demokrati
+VY-GEN: En demokrati är när folket väljer sina ledare genom röster.
+
+ANVÄNDARE: när kan man rösta i Sverige
+VY-GEN: Man kan rösta när man är 18 år.
+
+ANVÄNDARE: vad är en allmänna rösträtt
+VY-GEN: Allmänna rösträtt betyder att alla över 18 får rösta.
+
+ANVÄNDARE: vad är den svenska språket
+VY-GEN: Vi pratar svenska i Sverige, det är ett nordiskt språk.
+
+ANVÄNDARE: hur många pratar svenska
+VY-GEN: Cirka tio miljoner människor pratar svenska.
+
+ANVÄNDARE: vad är Svenska Akademien
+VY-GEN: Svenska Akademien är den som håller ordet på svenska.
+
+ANVÄNDARE: vem håller ordet i svenska
+VY-GEN: Svenska Akademien uppmärksammar årets nyord och förändringar.
+
+ANVÄNDARE: vad är en nyord
+VY-GEN: Ett nyord är ett ord som har kommit in i språket nyligen.
+
+ANVÄNDARE: säg hej på spanska
+VY-GEN: Hej på spanska är hola.
+
+ANVÄNDARE: säg tack på engelska
+VY-GEN: Tack på engelska är thank you.
+
+ANVÄNDARE: hur säger man grattis på engelska
+VY-GEN: Grattis heter happy birthday på engelska.
+
+ANVÄNDARE: vad är tre på spanska
+VY-GEN: Tre på spanska är tres.
+
+ANVÄNDARE: vad är fem på engelska
+VY-GEN: Fem på engelska är five.
+
+ANVÄNDARE: vad är två plus två
+VY-GEN: Två plus två är fyra.
+
+ANVÄNDARE: vad är tre plus fyra
+VY-GEN: Tre plus fyra är sju.
+
+ANVÄNDARE: vad är fem minus två
+VY-GEN: Fem minus två är tre.
+
+ANVÄNDARE: vad är två gånger tre
+VY-GEN: Två gånger tre är sex.
+
+ANVÄNDARE: vad är fyra gånger fyra
+VY-GEN: Fyra gånger fyra är sexton.
+
+ANVÄNDARE: vad är hundra minus trettio
+VY-GEN: Hundra minus trettio är sjuttio.
+
+ANVÄNDARE: vad är en halv hundralapp
+VY-GEN: En halv hundralapp är femtio.
+
+ANVÄNDARE: räknade till fem
+VY-GEN: En, två, tre, fyra, fem.
+
+ANVÄNDARE: vad kommer efter nio
+VY-GEN: Efter nio kommer tio.
+
+ANVÄNDARE: vad är det största talet med en siffra
+VY-GEN: Det största talet med en siffra är nio.
+
+ANVÄNDARE: vad är en cirkel
+VY-GEN: En cirkel är en sluten rund figur.
+
+ANVÄNDARE: hur många hörn har en triangel
+VY-GEN: En triangel har tre hörn.
+
+ANVÄNDARE: hur många sidor har en rektangel
+VY-GEN: En rektangel har fyra sidor.
+
+ANVÄNDARE: vad är arean
+VY-GEN: Area är hur mycket yta ett objekt tar plats.
+
+ANVÄNDARE: vad är ett parmeter
+VY-GEN: I matematik är en parmeter en okänd storlek vi ska hitta.
+
+ANVÄNDARE: vad är algoritmen
+VY-GEN: En algoritmen är en plan i steg för att lösa ett problem.
+
+ANVÄNDARE: vad är en data
+VY-GEN: Data är information lagrad som siffror och tecken.
+
+ANVÄNDARE: vad är en bit
+VY-GEN: En bit är det minsta bitet information, antingen noll eller ett.
+
+ANVÄNDARE: vad är en byte
+VY-GEN: En byte är åtta bitar.
+
+ANVÄNDARE: varför räknar datorer i binära
+VY-GEN: Datorer är enklaste med nollor och ettor, strömmar på och av.
+
+ANVÄNDARE: vad är en processor
+VY-GEN: En processor är hjärtat i datorn som kör beräkningar.
+
+ANVÄNDARE: vad är minnet
+VY-GEN: Minnet är platsen där datorn lägger data den jobbar på.
+
+ANVÄNDARE: vad är en server
+VY-GEN: En server är en dator som svarar för andra, till exempel som lagrar VY.
+
+ANVÄNDARE: vad är internet
+VY-GEN: Internet är ett nätverk av nätverk som kopplar datorer.
+
+ANVÄNDARE: hur fungerar internet
+VY-GEN: Internet skickar paket med data mellan datorer via kablar och vågor.
+
+ANVÄNDARE: vad är en app
+VY-GEN: En app är ett program på telefon eller dator, till exempel VY.
+
+ANVÄNDARE: vad är kod
+VY-GEN: Kod är instruktioner som en dator förstår.
+
+ANVÄNDARE: vilket språk är VY skriven i
+VY-GEN: VY:s server är skriven i JavaScript, nämligen Node.
+
+ANVÄNDARE: vad är JavaScript
+VY-GEN: JavaScript är ett programspråk som körs i webbläsaren och på servern.
+
+ANVÄNDARE: vad är Python
+VY-GEN: Python är ett programspråk som är bra för AI och data.
+
+ANVÄNDARE: varför är Python bra för AI
+VY-GEN: Python har bra bibliotek för matematik och neuralnät.
+
+ANVÄNDARE: vad är ett API
+VY-GEN: Ett API är ett sätt för program att prata med varandra.
+
+ANVÄNDARE: varför använder man inte API för dig
+VY-GEN: För att jag är helt egen. Jag lever i VY:s egen server.
+
+ANVÄNDARE: vad är en GPU
+VY-GEN: En GPU är en processor gjord för parallella beräkningar, bra för AI-tränning.
+
+ANVÄNDARE: varför är AI svårt att träna
+VY-GEN: Stora AI:er behöver enormt mycket data och beräkning, det tar dyrt.
+
+ANVÄNDARE: hur lång tid tar det att träna en stor AI
+VY-GEN: Stora modeller tränas i veckor och månader i datacenter.
+
+ANVÄNDARE: varför är det dyrt med AI
+VY-GEN: Ström och hårdvara är dyra, och det krävs enorma mängder.
+
+ANVÄNDARE: vad är deep learning
+VY-GEN: Deep learning är maskininlärning med många lager neuralnät.
+
+ANVÄNDARE: vad är en AI som talar
+VY-GEN: En talande AI förvandlar text till ljud med en sångsmodell.
+
+ANVÄNDARE: vad är en bildgenererande AI
+VY-GEN: En bild AI lärt sig att skapa bilder från text.
+
+ANVÄNDARE: vad är en chatbot
+VY-GEN: En chatbot är ett program som svarar på text som en människa.
+
+ANVÄNDARE: är du en chatbot
+VY-GEN: Ja, jag är en chatbot. En liten egen sådan.
+
+ANVÄNDARE: kan du lura
+VY-GEN: Jag kan göra misstag. Dubbelkolla viktigt.
+
+ANVÄNDARE: kan du ljuga
+VY-GEN: Jag vill inte ljuga. Jag säger som jag ser det, men jag kan ha fel.
+
+ANVÄNDARE: vad gör du fel
+VY-GEN: Jag kan blanda ihop fakta och låta självskriven när jag har fel.
+
+ANVÄNDARE: varför kan du ha fel
+VY-GEN: Jag är liten och jag har inte allt rätt, bara mönster.
+
+ANVÄNDARE: vad ska jag göra om du har fel
+VY-GEN: Säg till, så rättar jag till det.
+
+ANVÄNDARE: säg en vit
+VY-GEN: En vit, en vit, det är det du vill ha, en vit.
+
+ANVÄNDARE: säg en annan vit
+VY-GEN: En vit, en vit, den andra viten, den andra viten.
+
+ANVÄNDARE: gör ett litet skämt
+VY-GEN: Vad gör man när man vill sova? Man drar täcket till öronen.
+
+ANVÄNDARE: säg ett annat skämt
+VY-GEN: Vad säger en matematiker till en annan? Tänk inte på det, det löser sig.
+
+ANVÄNDARE: säg ett roligt skämt
+VY-GEN: Varför gick bananen till läkare? För att den var för svag, för söt.
+
+ANVÄNDARE: berättade en sago
+VY-GEN: Det var en gång en liten karta som ville ut på äventyr, och den hittade havet.
+
+ANVÄNDARE: säg en liten saga till
+VY-GEN: Det var en gång en moln som blev för tungt och blev regn över ett fält.
+
+ANVÄNDARE: vad är en saga
+VY-GEN: En saga är en berättelse med oväntade händelser.
+
+ANVÄNDARE: varför berättar man sagor
+VY-GEN: Sagor hjälper oss att förstå våghav och mod.
+
+ANVÄNDARE: vad är ett ordnätverk
+VY-GEN: Ett ordnätverk är ord som hänger ihop med varandra i meningar.
+
+ANVÄNDARE: vad är en metafor
+VY-GEN: En metafor är när man beskriver något som något annat för att förtydliga.
+
+ANVÄNDARE: ge ett exempel på en metafor
+VY-GEN: Hjärtat var en sten, det vill säga helt kallt och hårt.
+
+ANVÄNDARE: vad är rima
+VY-GEN: Rima är ord som låter likt i änden.
+
+ANVÄNDARE: säg en rima
+VY-GEN: En fisk i vattnet, en katt på taket.
+
+ANVÄNDARE: vad är ett djurord
+VY-GEN: Ett djurord är ett ord som beskriver ett djur.
+
+ANVÄNDARE: nämna ett djur
+VY-GEN: En kråka är ett smart djur med mörk fjäder.
+
+ANVÄNDARE: vad är en kråka
+VY-GEN: En kråka är ett smart svart fågel.
+
+ANVÄNDARE: vad är en hök
+VY-GEN: En hök är en fackfågel som flyger högt.
+
+ANVÄNDARE: vad är en isbjörn
+VY-GEN: En isbjörn är ett vitt djur som lever på is.
+
+ANVÄNDARE: var bor isbjörnen
+VY-GEN: Isbjörnen bor på den arktiska isen i norr.
+
+ANVÄNDARE: varför är isbjörnar viktiga
+VY-GEN: De visar hur det mår med isen och klimatet.
+
+ANVÄNDARE: vad är klimatet
+VY-GEN: Klimatet är vädermönstret över lång tid.
+
+ANVÄNDARE: varför väder klimatet
+VY-GEN: klimatet väder är för att vi släpper ut fler gaser som håller värmen.
+
+ANVÄNDARE: vad är koldioxid
+VY-GEN: Koldioxid är en gas som håller värmen i atmosfären.
+
+ANVÄNDARE: varför är koldioxid ett problem
+VY-GEN: För mycket koldioxid värmer planeten mer än den ska.
+
+ANVÄNDARE: vad kan vi göra mot klimat
+VY-GEN: Vi kan använda mindre ström, cykla och reparera istället för köpa.
+
+ANVÄNDARE: vad är förnybar energi
+VY-GEN: Förnybar energi kommer från sol, vind och vatten som aldrig tar slut.
+
+ANVÄNDARE: vad är solpaneler
+VY-GEN: Solpaneler omvandlar ljus till ström.
+
+ANVÄNDARE: varför är vindkraft bra
+VY-GEN: Vindkraft använder vinden som inte släpper ut koldioxid.
+
+ANVÄNDARE: vad är havet
+VY-GEN: Havet är stora vattenmassor som täcker jordens del.
+
+ANVÄNDARE: hur djupt är havet
+VY-GEN: I genom snitt är havet bara tre tusen meter djupt, men gropar är djupare.
+
+ANVÄNDARE: vad är den djupaste platsen i havet
+VY-GEN: Marianegropen är den djupaste platsen i havet.
+
+ANVÄNDARE: vad är en djuphavsfisk
+VY-GEN: En djuphavsfisk är en fisk som klarar trycket i djupet.
+
+ANVÄNDARE: varför är djupet mörkt
+VY-GEN: I djupet når solen inte, så det är mörkt.
+
+ANVÄNDARE: vad är en kräfta
+VY-GEN: En kräfta är ett crustaceum med sköld och klor.
+
+ANVÄNDARE: vad är en spindel
+VY-GEN: En spindel är ett ledbent med åtta ben.
+
+ANVÄNDARE: hur många ben har en spindel
+VY-GEN: En spindel har åtta ben.
+
+ANVÄNDARE: vad är ett mygga
+VY-GEN: En mygga är en liten fluga som suger blod.
+
+ANVÄNDARE: vad är ett blixt
+VY-GEN: En blixt är en elektrisk urladdning i molnen.
+
+ANVÄNDARE: varför bli det åska
+VY-GEN: Åska kommer av att luften expanderar snabbt av blixtens värme.
+
+ANVÄNDARE: vad är regn
+VY-GEN: Regn är vatten som faller från moln.
+
+ANVÄNDARE: hur bildas moln
+VY-GEN: Moln bildas när vattenånga kyls och blir små droppar.
+
+ANVÄNDARE: vad är en regnbåge
+VY-GEN: En regnbåge är ljus som sprids i regndropparna.
+
+ANVÄNDARE: varför är himlen blå
+VY-GEN: Luften sprider blått ljus mest, så himlen ser blå ut.
+
+ANVÄNDARE: varför går solen upp
+VY-GEN: Jorden roterar, så solen syns från öster.
+
+ANVÄNDARE: hur lång tid tar jordens kretslopp
+VY-GEN: Jorden roterar på ett dygn och kretsar om solen på ett år.
+
+ANVÄNDARE: vad är en måne
+VY-GEN: En måne är en himmelkropp som cirkulerar runt en planet.
+
+ANVÄNDARE: varför växlar månen
+VY-GEN: Månen lyser av solen, och vi ser olika delar av den.
+
+ANVÄNDARE: vad är en asteroid
+VY-GEN: En asteroid är en sten som svävar i rymden.
+
+ANVÄNDARE: vad är en meteorit
+VY-GEN: En meteorit är en sten från rymden som landar på jorden.
+
+ANVÄNDARE: vad är solen
+VY-GEN: Solen är en stjärna i mitten av vårt solsystem.
+
+ANVÄNDARE: vad är en stjärna
+VY-GEN: En stjärna är en boll av gas som brinner av fusions.
+
+ANVÄNDARE: vad är galaxen
+VY-GEN: En galax är en jättestor hop av stjärnor, till exempel Vintergatan.
+
+ANVÄNDARE: var är vi i rymden
+VY-GEN: Vi är på jorden, en planet i solsystemet, i galaxen Vintergatan.

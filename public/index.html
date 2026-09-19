@@ -1231,6 +1231,10 @@ textarea:focus-visible {
         <path d="m12 3 9 17H3L12 3Z" />
         <path d="M12 9v4M12 17h.01" />
       </symbol>
+      <symbol id="icon-sparkle" viewBox="0 0 24 24">
+        <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+        <path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z" />
+      </symbol>
       <symbol id="icon-user" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.2" />
         <path d="M5 20c.7-3.7 3-5.5 7-5.5s6.3 1.8 7 5.5" />
@@ -1261,6 +1265,13 @@ textarea:focus-visible {
           </button>
           <button class="nav-item nav-item--create" type="button" data-view="create">
             <span class="nav-create-icon"><svg class="icon icon-sm"><use href="#icon-plus"></use></svg></span><span>Skapa</span>
+          </button>
+        </nav>
+
+        <div class="rail-label">EGEN AI</div>
+        <nav class="main-nav">
+          <button class="nav-item" type="button" data-view="ai">
+            <svg class="icon"><use href="#icon-sparkle"></use></svg><span>VY-Gen</span><span class="ai-tag">100 % EGEN</span>
           </button>
         </nav>
 
@@ -1342,6 +1353,29 @@ textarea:focus-visible {
             <div class="legal-note"><div class="legal-note-icon"><svg class="icon"><use href="#icon-alert"></use></svg></div><div><strong>Juridisk checklista behövs före lansering</strong><p>Detta är ett produktförslag, inte juridisk rådgivning. GDPR, DSA, åldersgränser, samtycke, radering och rapportering måste granskas med jurist och barnsäkerhetsexpert.</p></div></div>
           </section>
 
+          <section class="app-view" id="view-ai" data-view-panel="ai">
+            <div class="page-heading-block"><span class="section-kicker">100 % EGEN AI</span><h2>VY-Gen</h2><p>VY:s allra egna AI. En liten språkmodell som byggts, tränats och lever helt i VY:s egen server — ingen extern API.</p></div>
+            <div class="ai-model-strip" id="ai-model-strip" aria-label="Modellfakta"></div>
+            <div class="ai-chat-card">
+              <div class="ai-chat-header">
+                <div class="ai-avatar"><svg class="icon icon-sm"><use href="#icon-sparkle"></use></svg></div>
+                <div><strong>VY-Gen</strong><span id="ai-status-text">tränad i VY:s sandbox</span></div>
+              </div>
+              <div class="ai-chat-log" id="ai-chat-log" aria-live="polite"></div>
+              <div class="ai-chat-chips" id="ai-chat-chips">
+                <button type="button" data-ai-chip="Vad kan du?">Vad kan du?</button>
+                <button type="button" data-ai-chip="Vad är du?">Vad är du?</button>
+                <button type="button" data-ai-chip="Vad är VY?">Vad är VY?</button>
+                <button type="button" data-ai-chip="Berätta en fakta">Berätta en fakta</button>
+              </div>
+              <form class="ai-chat-form" id="ai-chat-form">
+                <input id="ai-chat-input" maxlength="200" placeholder="Fråga VY-Gen …" autocomplete="off" />
+                <button class="primary-button" type="submit">Skicka</button>
+              </form>
+              <p class="ai-chat-footnote">VY-Gen är en prototyp-AI och kan ha fel. Vid akut hjälp: ring 112, eller 113 133 (Barn- och ungdomstelefonen).</p>
+            </div>
+          </section>
+
           <section class="app-view" id="view-moderator" data-view-panel="moderator">
             <div class="page-heading-block page-heading-block--row"><div><span class="section-kicker">INTERN VERKTYGSVY</span><h2>Moderatorcenter</h2><p>Prioritera rapporter och lämna spårbar åtgärdshistorik.</p></div><div class="moderator-role"><span class="role-dot"></span> Demo-moderator</div></div>
             <div class="moderator-stats"><div><span>NYA RAPPORTER</span><strong id="new-report-count">3</strong><small>+1 sedan igår</small></div><div><span>SVARSTID</span><strong>18<span>m</span></strong><small>Mål under 30 min</small></div><div><span>ÅTGÄRDADE</span><strong>97<span>%</span></strong><small>Den här veckan</small></div></div>
@@ -1364,6 +1398,7 @@ textarea:focus-visible {
       <button class="mobile-nav-item is-active" type="button" data-view="feed"><svg class="icon"><use href="#icon-home"></use></svg><span>För dig</span></button>
       <button class="mobile-nav-item" type="button" data-view="following"><svg class="icon"><use href="#icon-users"></use></svg><span>Följer</span></button>
       <button class="mobile-create" type="button" data-view="create"><svg class="icon"><use href="#icon-plus"></use></svg></button>
+      <button class="mobile-nav-item" type="button" data-view="ai"><svg class="icon"><use href="#icon-sparkle"></use></svg><span>AI</span></button>
       <button class="mobile-nav-item" type="button" data-view="safety"><svg class="icon"><use href="#icon-shield"></use></svg><span>Skydd</span></button>
       <button class="mobile-nav-item" type="button" data-view="moderator"><svg class="icon"><use href="#icon-flag"></use></svg><span>Mod</span></button>
     </nav>
