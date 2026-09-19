@@ -1,0 +1,47 @@
+{
+  "params": 3239680,
+  "corpus_chars": 1848768,
+  "vocab_size": 65,
+  "best_dev_loss": 0.0703,
+  "epochs": 5,
+  "config": {
+    "d_model": 256,
+    "n_heads": 4,
+    "n_layers": 4,
+    "d_ff": 1024,
+    "ctx": 256
+  },
+  "seconds": 1382.9,
+  "history": [
+    {
+      "epoch": 1,
+      "train": 1.7787,
+      "dev": 1.2684,
+      "sec": 274.7
+    },
+    {
+      "epoch": 2,
+      "train": 0.8194,
+      "dev": 0.3876,
+      "sec": 551.6
+    },
+    {
+      "epoch": 3,
+      "train": 0.232,
+      "dev": 0.1387,
+      "sec": 824.1
+    },
+    {
+      "epoch": 4,
+      "train": 0.1121,
+      "dev": 0.0876,
+      "sec": 1105.1
+    },
+    {
+      "epoch": 5,
+      "train": 0.0798,
+      "dev": 0.0703,
+      "sec": 1381.4
+    }
+  ]
+}
