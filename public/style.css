@@ -868,3 +868,164 @@ body {
   color: var(--text-muted);
   font-style: italic;
 }
+
+/* ============================================================
+   TOUCH & MOBIL – kartan i fokus, jord & folk att måla
+   ============================================================ */
+#worldCanvas, #minimapCanvas {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hint-mobile { display: none; }
+.mobile-fab { display: none; }
+
+@media (max-width: 900px) {
+  /* ----- Kompakt toppfält ----- */
+  .topbar {
+    height: auto;
+    min-height: 50px;
+    flex-wrap: wrap;
+    padding: 5px 8px;
+    gap: 5px;
+  }
+  .brand h1 { font-size: 12px; letter-spacing: 0.3px; }
+  .subtitle { display: none; }
+  .god-emblem { width: 26px; height: 26px; font-size: 13px; }
+  .brand { gap: 7px; }
+
+  .divine-bar { padding: 3px 8px; gap: 6px; }
+  .faith-label { display: none; }
+  .faith-icon { font-size: 14px; }
+  .sandbox-switch span { display: none; }
+  .sandbox-switch { padding-left: 6px; }
+
+  .top-stats {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    gap: 4px;
+    scrollbar-width: none;
+    padding-bottom: 1px;
+  }
+  .top-stats::-webkit-scrollbar { display: none; }
+  .stat-chip { min-width: 56px; padding: 3px 7px; }
+  .stat-chip:nth-child(4),
+  .stat-chip:nth-child(5) { display: none; } /* Byggnader/Tempel tar för mycket plats */
+
+  .top-controls { gap: 5px; flex-wrap: wrap; }
+  .preset-select { display: none; }
+  .btn-speed { padding: 7px 9px; font-size: 13px; }
+  .btn-action { padding: 7px 9px; font-size: 11px; }
+
+  /* ----- Arbetsyta: kartan är hela skärmen ----- */
+  .workspace { position: relative; display: block; }
+  .viewport { position: absolute; inset: 0; }
+
+  /* Vänsterlåda -> bottenlåda (Jord & Folk-verktyg) */
+  .sidebar-left {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    top: auto;
+    width: auto;
+    max-height: 58vh;
+    border-right: none;
+    border-top: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(107%);
+    transition: transform 0.26s ease;
+    z-index: 60;
+    box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.6);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .sidebar-left.open { transform: translateY(0); }
+
+  /* Högerlåda -> sidopanel (Rike & Krönika) */
+  .sidebar-right {
+    position: fixed;
+    top: 0; bottom: 0; right: 0;
+    width: min(92vw, 350px);
+    border-left: none;
+    transform: translateX(107%);
+    transition: transform 0.26s ease;
+    z-index: 60;
+    box-shadow: -14px 0 44px rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .sidebar-right.open { transform: translateX(0); }
+
+  /* Flytande knappar i kartan */
+  .mobile-fab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: absolute;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    background: rgba(14, 21, 37, 0.94);
+    border: 1px solid var(--border-gold);
+    color: #fde68a;
+    border-radius: 14px;
+    padding: 7px 11px;
+    font-size: 19px;
+    line-height: 1.1;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-fab:active { transform: scale(0.95); }
+  .fab-label { font-size: 9px; font-weight: 800; letter-spacing: 0.2px; }
+  .fab-left { left: 10px; }
+  .fab-right {
+    right: 10px;
+    border-color: var(--border-subtle);
+    color: #cbd5e1;
+  }
+
+  /* HUD på kartan */
+  .hud-toggles { display: none; }
+  .canvas-hud-top { justify-content: flex-end; }
+  .hud-btn { padding: 9px 13px; font-size: 14px; }
+  .canvas-hud-bottom-left {
+    top: 10px;
+    bottom: auto;
+    left: 10px;
+    right: auto;
+  }
+  .hint-desktop { display: none; }
+  .hint-mobile {
+    display: flex;
+    gap: 10px;
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  .minimap-card { display: none; } /* kartan är själva skärmen */
+
+  /* Större touchmål i verktygslådan */
+  .power-btn { min-height: 56px; padding: 9px 4px; }
+  .power-icon { font-size: 21px; }
+  .power-name { font-size: 11px; }
+  .power-tab { padding: 10px 3px; font-size: 12px; }
+  .brush-btn { padding: 8px 11px; font-size: 12px; }
+  .brush-bar { flex-wrap: wrap; }
+  .law-toggle { padding: 9px 8px; }
+  .btn-mini { padding: 6px 11px; font-size: 11.5px; }
+  .btn-ins-act { padding: 11px 4px; font-size: 12px; }
+  .event-item { padding: 8px 9px; font-size: 12px; }
+  .kingdom-card { padding: 9px 8px; }
+  .ins-stats-grid { gap: 7px; }
+
+  .panel { border-radius: 12px; }
+}
+
+/* extra små mobiler */
+@media (max-width: 420px) {
+  .brand h1 { font-size: 11px; }
+  .stat-chip:nth-child(3) { display: none; } /* även Kungariken göms på minsta skärmar */
+  .power-grid { gap: 5px; }
+}

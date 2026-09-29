@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>AETHELGARD – Gudasimulator & Planetbyggare</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
@@ -106,8 +106,8 @@
       <!-- God Power Categories Tabs -->
       <section class="panel powers-panel">
         <div class="power-tabs" id="powerTabs">
-          <button class="power-tab active" data-tab="terraform">🌍 Natur</button>
-          <button class="power-tab" data-tab="life">👥 Liv & Riken</button>
+          <button class="power-tab active" data-tab="terraform">🪨 Jord</button>
+          <button class="power-tab" data-tab="life">👥 Folk</button>
           <button class="power-tab" data-tab="miracles">✨ Mirakel</button>
           <button class="power-tab" data-tab="disasters">☄️ Katastrof</button>
         </div>
@@ -184,12 +184,20 @@
 
       <!-- Bottom-left Controls Hint -->
       <div class="canvas-hud-bottom-left">
-        <div class="hud-hint">
+        <div class="hud-hint hint-desktop">
           <span>🖱️ <b>Vänsterklick / Håll in:</b> Använd gudakraft</span>
           <span>🖐️ <b>Högerklick + Dra (eller Mellanslag+Dra):</b> Panorera</span>
           <span>⚙️ <b>Scrollhjul:</b> Zooma</span>
         </div>
+        <div class="hud-hint hint-mobile">
+          <span>👆 <b>Dra:</b> Måla jord eller folk</span>
+          <span>✌️ <b>Två fingrar:</b> Zooma & flytta</span>
+        </div>
       </div>
+
+      <!-- Mobile floating buttons (Jord/Folk-verktyg + panel) -->
+      <button class="mobile-fab fab-left" id="btnTogglePowers" title="Öppna jord- & folkverktyg">🪨<span class="fab-label">Jord &amp; Folk</span></button>
+      <button class="mobile-fab fab-right" id="btnTogglePanel" title="Öppna rike & krönika">📖<span class="fab-label">Panel</span></button>
 
       <!-- Bottom-right Minimap -->
       <div class="minimap-card">

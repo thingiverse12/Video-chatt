@@ -1413,6 +1413,8 @@ function renderPowerGrid() {
       state.activePower = p.id;
       updateActivePowerBanner(p);
       renderPowerGrid();
+      // Mobil: stäng verktygslådan så kartan syns
+      if (typeof isMobileLayout === 'function' && isMobileLayout()) closeLeftDrawer();
     });
     grid.appendChild(btn);
   }
@@ -1669,68 +1671,159 @@ function updateStatsUI() {
 function setupInput() {
   canvas.addEventListener('contextmenu', e => e.preventDefault());
 
-  canvas.addEventListener('mousedown', (e) => {
+  // ===== Pointer Events – mus + pekskärm (måla, nypa-zoom, pan) =====
+  const pointers = new Map();      // pointerId -> {x,y}
+  let pinch = null;                // aktiv nypa
+  let stalePointerId = null;       // pekare kvar efter nypa – ignoreras tills den släpps
+  let panning = false;
+  let painting = false;
+  let downMoved = 0;
+  let downStart = null;
+  let lastPaintAt = 0;
+
+  const isMobileLayout = () => window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+
+  canvas.addEventListener('pointerdown', (e) => {
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    pointers.set(e.pointerId, { x, y });
+
+    // Två fingrar / två pekare -> nypa-zoom
+    if (pointers.size === 2) {
+      painting = false; panning = false;
+      mouse.down = false; mouse.panning = false;
+      const [p1, p2] = Array.from(pointers.values());
+      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
+      pinch = {
+        dist0: dist,
+        zoom0: cam.zoom,
+        mid0x: (p1.x + p2.x) / 2,
+        mid0y: (p1.y + p2.y) / 2,
+        camX0: cam.x,
+        camY0: cam.y,
+      };
+      return;
+    }
+    if (pointers.size > 2) return;
+
+    stalePointerId = null;
+    downMoved = 0;
+    downStart = { x, y };
+    mouse.x = x; mouse.y = y;
+    mouse.lastSX = x; mouse.lastSY = y;
     mouse.moved = 0;
-    mouse.lastSX = mouse.x;
-    mouse.lastSY = mouse.y;
-    const w = screenToWorld(mouse.x, mouse.y);
+    const w = screenToWorld(x, y);
     mouse.wx = w.x; mouse.wy = w.y;
 
-    if (e.button === 2 || (e.button === 0 && spaceHeld) || e.button === 1) {
-      mouse.panning = true;
-      e.preventDefault();
+    // Panning: höger/mederklick, eller vänster + mellanslag
+    const wantPan = e.button === 2 || e.button === 1 || (e.button === 0 && spaceHeld);
+    if (wantPan) {
+      panning = true; mouse.panning = true;
       return;
     }
-    if (e.button === 0) {
+    if (e.button !== 0) return;
+
+    if (state.activePower) {
+      painting = true;
       mouse.down = true;
-      if (state.activePower) {
-        applyPower(mouse.wx, mouse.wy, state.activePower);
-        state.lastPowerAt = performance.now();
-      } else {
-        inspectAt(mouse.wx, mouse.wy);
-      }
+      applyPower(mouse.wx, mouse.wy, state.activePower);
+      lastPaintAt = performance.now();
+      // Mobil: stäng verktygslådan så kartan blir synlig
+      if (isMobileLayout()) closeLeftDrawer();
+    } else if (e.pointerType === 'mouse') {
+      // Inspekteringsläge med mus: klicka för att välja
+      inspectAt(mouse.wx, mouse.wy);
+    } else {
+      // Inspekteringsläge med touch: dra = panning, tap = inspektera
+      panning = true; mouse.panning = true;
     }
   });
 
-  window.addEventListener('mousemove', (e) => {
+  canvas.addEventListener('pointermove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-    if (mouse.x < -50 || mouse.y < -50 || mouse.x > viewportW + 50 || mouse.y > viewportH + 50) {
-      if (!mouse.down && !mouse.panning) return;
-    }
-    const w = screenToWorld(mouse.x, mouse.y);
-    mouse.wx = w.x; mouse.wy = w.y;
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
 
-    if (mouse.panning) {
-      const dx = mouse.x - mouse.lastSX, dy = mouse.y - mouse.lastSY;
-      cam.x -= dx / cam.zoom;
-      cam.y -= dy / cam.zoom;
-      mouse.moved += Math.abs(dx) + Math.abs(dy);
-      mouse.lastSX = mouse.x; mouse.lastSY = mouse.y;
-      clampCam();
+    if (!pointers.has(e.pointerId)) {
+      // Bara uppdatera musmarkör (penselringen)
+      mouse.x = x; mouse.y = y;
+      const w = screenToWorld(x, y);
+      mouse.wx = w.x; mouse.wy = w.y;
       return;
     }
-    mouse.moved += Math.abs(mouse.x - mouse.lastSX) + Math.abs(mouse.y - mouse.lastSY);
-    mouse.lastSX = mouse.x; mouse.lastSY = mouse.y;
+    pointers.set(e.pointerId, { x, y });
 
-    // Måla kontinuerligt
-    if (mouse.down && state.activePower) {
+    // Nypa-zoom: behåll världspunkten under fingrarna
+    if (pinch && pointers.size >= 2) {
+      const [p1, p2] = Array.from(pointers.values());
+      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
+      const midx = (p1.x + p2.x) / 2, midy = (p1.y + p2.y) / 2;
+      const newZoom = clamp(pinch.zoom0 * (dist / pinch.dist0), 0.35, 7);
+      const worldX = pinch.camX0 + pinch.mid0x / pinch.zoom0;
+      const worldY = pinch.camY0 + pinch.mid0y / pinch.zoom0;
+      cam.zoom = newZoom;
+      cam.x = worldX - midx / newZoom;
+      cam.y = worldY - midy / newZoom;
+      clampCam();
+      $('#camZoomLabel').textContent = cam.zoom.toFixed(1) + 'x';
+      return;
+    }
+
+    if (e.pointerId === stalePointerId) return;
+
+    downMoved += Math.abs(x - mouse.lastSX) + Math.abs(y - mouse.lastSY);
+    mouse.x = x; mouse.y = y;
+    const w = screenToWorld(x, y);
+    mouse.wx = w.x; mouse.wy = w.y;
+
+    if (panning) {
+      cam.x -= (x - mouse.lastSX) / cam.zoom;
+      cam.y -= (y - mouse.lastSY) / cam.zoom;
+      clampCam();
+      mouse.lastSX = x; mouse.lastSY = y;
+      return;
+    }
+    mouse.lastSX = x; mouse.lastSY = y;
+
+    if (painting && state.activePower) {
       const now = performance.now();
-      if (now - (state.lastPowerAt || 0) > 90) {
+      if (now - lastPaintAt > 90) {
         applyPower(mouse.wx, mouse.wy, state.activePower);
-        state.lastPowerAt = now;
+        lastPaintAt = now;
       }
     }
   });
 
-  window.addEventListener('mouseup', () => {
-    mouse.down = false;
-    mouse.panning = false;
-  });
+  const endPointer = (e) => {
+    const wasDown = pointers.has(e.pointerId);
+    const startPos = downStart;
+    pointers.delete(e.pointerId);
+
+    if (pinch) {
+      if (pointers.size < 2) {
+        pinch = null;
+        // Resterande pekare får inte måla/panna förrän den släpps
+        if (pointers.size === 1) stalePointerId = Array.from(pointers.keys())[0];
+        panning = false; painting = false;
+        mouse.down = false; mouse.panning = false;
+      }
+      return;
+    }
+
+    if (wasDown && pointers.size === 0) {
+      // Tap i inspektionsläge med touch = inspektera
+      if (!painting && panning && startPos && downMoved < 10) {
+        const w = screenToWorld(startPos.x, startPos.y);
+        inspectAt(w.x, w.y);
+      }
+      panning = false; painting = false;
+      mouse.down = false; mouse.panning = false;
+      stalePointerId = null;
+      downStart = null;
+    }
+  };
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
 
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -1785,6 +1878,18 @@ function setupInput() {
   });
 }
 
+function isMobileLayout() {
+  return !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+}
+function closeLeftDrawer() {
+  const el = document.querySelector('.sidebar-left');
+  if (el) el.classList.remove('open');
+}
+function openRightDrawer() {
+  const el = document.querySelector('.sidebar-right');
+  if (el) el.classList.add('open');
+}
+
 function inspectAt(wx, wy) {
   // Närmaste enhet
   let best = null, bd = Math.max(2.2, 6 / cam.zoom);
@@ -1794,14 +1899,14 @@ function inspectAt(wx, wy) {
     const d = dist2(u.x, u.y, wx, wy);
     if (d < bd2) { bd2 = d; best = u; }
   }
-  if (best) { selectUnit(best.id, false); return; }
+  if (best) { selectUnit(best.id, false); if (isMobileLayout()) openRightDrawer(); return; }
   // Stad?
   const c = state.cities.find(c2 => dist2(c2.x, c2.y, wx, wy) < 9);
-  if (c) { selectKingdom(c.kingdomId, false); return; }
+  if (c) { selectKingdom(c.kingdomId, false); if (isMobileLayout()) openRightDrawer(); return; }
   // Rike via territorium?
   const tx = clamp(Math.floor(wx), 0, W - 1), ty = clamp(Math.floor(wy), 0, H - 1);
   const o = state.owner[ty * W + tx];
-  if (o >= 0 && state.kingdoms[o]) { selectKingdom(o, false); return; }
+  if (o >= 0 && state.kingdoms[o]) { selectKingdom(o, false); if (isMobileLayout()) openRightDrawer(); return; }
   state.selected = null;
   state.followSelected = false;
   $('#btnFollowUnit').classList.remove('active');
@@ -1883,7 +1988,25 @@ function setupUI() {
     $('#btnFollowUnit').classList.toggle('active', state.followSelected);
   });
 
-  updateActivePowerBanner(null);
+  // Mobil: flytande knappar för verktygslåda & panel
+  $('#btnTogglePowers').addEventListener('click', () => {
+    const el = document.querySelector('.sidebar-left');
+    el.classList.toggle('open');
+    document.querySelector('.sidebar-right').classList.remove('open');
+  });
+  $('#btnTogglePanel').addEventListener('click', () => {
+    const el = document.querySelector('.sidebar-right');
+    el.classList.toggle('open');
+    document.querySelector('.sidebar-left').classList.remove('open');
+  });
+
+  // På pekskärm: börja med "Höj Mark" så första gnidningen formar jord direkt
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    state.activePower = 'raise';
+    updateActivePowerBanner(findPower('raise'));
+  }
+
+  updateActivePowerBanner(state.activePower ? findPower(state.activePower) : null);
   renderPowerGrid();
   renderInspector();
   updateEraLabel();
