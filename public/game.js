@@ -68,15 +68,15 @@ const W = 256, H = 160;
 const SEA = 0.42;
 
 const TERRAIN_COLORS = [
-  [10, 42, 94],    // deep
-  [20, 83, 158],   // water
-  [214, 192, 122], // sand
-  [74, 156, 63],   // grass
-  [44, 110, 49],   // forest
-  [122, 138, 79],  // hill
-  [125, 125, 125], // mount
-  [232, 240, 248], // snow
-  [226, 72, 28],   // lava
+  [5, 22, 62],     // deep – djup marinblå
+  [16, 74, 148],   // water
+  [228, 206, 142], // sand – varmare
+  [78, 158, 66],   // grass – frodigrare
+  [38, 102, 50],   // forest – djupare grön
+  [126, 142, 86],  // hill – olivgrön
+  [132, 127, 138], // mount – kall gråviolett
+  [240, 246, 252], // snow – renare
+  [255, 92, 32],   // lava – glödande
 ];
 
 // ---------- Race ----------
@@ -85,6 +85,7 @@ const RACES = {
   elf:    { name: 'Alv',       icon: '🧝', color: '#8ef0b0', civ: true },
   dwarf:  { name: 'Dvärg',     icon: '🧔', color: '#ff9b6b', civ: true },
   orc:    { name: 'Orch',      icon: '👹', color: '#8bd450', civ: true },
+  hybrid: { name: 'Hybrid',    icon: '🧬', color: '#67e8f9', civ: true },
   animal: { name: 'Djur',      icon: '🐑', color: '#e6d3a3', civ: false },
   monster:{ name: 'Monster',   icon: '🐉', color: '#d56aff', civ: false },
 };
@@ -117,6 +118,7 @@ const POWER_TABS = {
     { id: 'peace',  icon: '🕊️', name: 'Fred',     desc: 'Alla krig i världen tar slut.', cost: 80 },
     { id: 'wisdom', icon: '📚', name: 'Kunskap',  desc: 'En stor idé föds – civilisationen springer framåt.', cost: 50 },
     { id: 'fertile',icon: '🌾', name: 'Befrukta', desc: 'Gräs gror till tät skog.', cost: 20 },
+    { id: 'fusion', icon: '🧬', name: 'Fusion',   desc: 'Småla ihop varelser till hybrider, eller slå ihop närliggande städer till megastäder.', cost: 40 },
   ],
   disasters: [
     { id: 'meteor',   icon: '☄️', name: 'Meteor',   desc: 'En meteor slår ner och lämnar krater.', cost: 70 },
@@ -176,6 +178,8 @@ const state = {
 // ---------- Kamera ----------
 const cam = { x: 0, y: 0, zoom: 1 };
 let canvas, ctx, terrainCv, terrCtx, terrImg, terrCv, terrOvCtx, terrOvImg, miniCtx;
+let cloudSprite = null; // mjuk molnsprite
+let vignette = null;    // vinjettgradient för hörnen
 let viewportW = 100, viewportH = 100, DPR = 1;
 
 // ---------- Input ----------
@@ -269,17 +273,40 @@ function terrainFromHeight(h, m, sea, preset) {
 // ============================================================
 function renderTerrain() {
   const d = terrImg.data;
-  for (let i = 0; i < W * H; i++) {
-    const t = state.terrain[i];
-    const base = TERRAIN_COLORS[t];
-    // Litet per-tile variation för textur
-    const v = (((i * 2654435761) >>> 0) % 17) - 8;
-    let r = base[0] + v, g = base[1] + v, b = base[2] + v;
-    if (t === T_LAVA) { const flick = Math.floor(Math.random() * 40); r = 226; g = 72 + flick; b = 28; }
-    d[i * 4] = clamp(r, 0, 255);
-    d[i * 4 + 1] = clamp(g, 0, 255);
-    d[i * 4 + 2] = clamp(b, 0, 255);
-    d[i * 4 + 3] = 255;
+  const hArr = state.height;
+  for (let y = 0; y < H; y++) {
+    const y0 = Math.max(0, y - 1), y1 = Math.min(H - 1, y + 1);
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      const t = state.terrain[i];
+      const base = TERRAIN_COLORS[t];
+      // ---- Hillshade: ljus från nordväst ger markerad terräng ----
+      const x0 = Math.max(0, x - 1), x1 = Math.min(W - 1, x + 1);
+      const slope = (hArr[y * W + x0] - hArr[y * W + x1]) * 1.1
+                  + (hArr[y0 * W + x] - hArr[y1 * W + x]) * 1.1;
+      let shade;
+      if (t === T_DEEP || t === T_WATER) {
+        const depth = clamp((SEA - hArr[i]) * 3.2, 0, 1);
+        shade = 1.12 - depth * 0.45 + clamp(slope * 2.5, -0.08, 0.1);
+      } else if (t === T_LAVA) {
+        shade = 1 + clamp(slope * 3, -0.3, 0.45);
+      } else {
+        shade = 1 + clamp(slope * 7, -0.42, 0.55);
+      }
+      // Litet per-tile variation för textur
+      const v = (((i * 2654435761) >>> 0) % 13) - 6;
+      let r, g, b;
+      if (t === T_LAVA) {
+        const flick = Math.floor(Math.random() * 70);
+        r = 255; g = 92 + flick; b = 32 + Math.floor(flick * 0.3);
+      } else {
+        r = base[0] + v; g = base[1] + v; b = base[2] + v;
+      }
+      d[i * 4] = clamp(r * shade, 0, 255);
+      d[i * 4 + 1] = clamp(g * shade, 0, 255);
+      d[i * 4 + 2] = clamp(b * shade, 0, 255);
+      d[i * 4 + 3] = 255;
+    }
   }
   terrCtx.putImageData(terrImg, 0, 0);
   state.terrainDirty = false;
@@ -304,7 +331,7 @@ function renderTerritory() {
 // ENHETER
 // ============================================================
 function spawnUnit(race, x, y, kingdomId = null) {
-  if (state.units.length >= 2600) return null;
+  if (state.units.length >= MAX_UNITS) return null;
   x = clamp(Math.round(x), 0, W - 1);
   y = clamp(Math.round(y), 0, H - 1);
   const i = y * W + x;
@@ -380,8 +407,8 @@ function succession(k) {
 // KUNGARIKEN & STÄDER
 // ============================================================
 function foundKingdom(u) {
-  if (state.kingdoms.length >= 24) return false;
-  const raceName = { human: 'människor', elf: 'alver', dwarf: 'dvärgar', orc: 'orcher' }[u.race];
+  if (state.kingdoms.length >= 40) return false;
+  const raceName = { human: 'människor', elf: 'alver', dwarf: 'dvärgar', orc: 'orcher', hybrid: 'hybrider' }[u.race];
   const id = state.nextKingdomId++;
   const color = FACTION_COLORS[state.kingdomColorsUsed++ % FACTION_COLORS.length];
   const rgb = hexToRgb(color);
@@ -485,6 +512,7 @@ function warsCount() {
 // ============================================================
 // RUMSLIG HASH (snabb grannsöking)
 // ============================================================
+const MAX_UNITS = 6000;
 const CELL = 8, GW = Math.ceil(W / CELL), GH = Math.ceil(H / CELL);
 let grid = [];
 function rebuildGrid() {
@@ -692,6 +720,7 @@ function applyPower(wx, wy, powerId) {
       }
       state.terrainDirty = true; state.territoryDirty = true;
       burst(wx, wy, '#ff9f43', 60, 3.5);
+      state.particles.push({ ring: true, x: wx + 0.5, y: wy + 0.5, r0: 1, r1: R * 1.8, life: 1, maxLife: 1, color: '#fdba74' });
       addEvent('☄️ EN METEOR SLÅR NER! En glödande krater lämnas där städer en gång stod.', wx, wy);
       break;
     }
@@ -707,6 +736,7 @@ function applyPower(wx, wy, powerId) {
       }
       state.terrainDirty = true; state.territoryDirty = true;
       burst(wx, wy, '#ff4d1c', 50, 3);
+      state.particles.push({ ring: true, x: wx + 0.5, y: wy + 0.5, r0: 1, r1: R * 1.7, life: 1, maxLife: 1, color: '#fca5a5' });
       addEvent('🌋 ETT VULKANUTBROTT skakar jorden! Lava strömmar över landet.', wx, wy);
       break;
     }
@@ -767,7 +797,147 @@ function applyPower(wx, wy, powerId) {
       addEvent('🌍 Ett jordskälv sliter sönder landet i en lång spricka.', wx, wy);
       break;
     }
+
+    // --- FUSION ---
+    case 'fusion': {
+      const R = Math.max(5, r * 1.4);
+      const fusedUnits = fuseUnitsNear(wx, wy, R);
+      const fusedCities = fuseCitiesNear(wx, wy, R);
+      if (fusedUnits > 0 || fusedCities > 0) {
+        burst(wx, wy, '#67e8f9', 44, 3.2);
+        burst(wx, wy, '#c084fc', 30, 2.4);
+        state.particles.push({ ring: true, x: wx + 0.5, y: wy + 0.5, r0: 1, r1: R * 1.6, life: 1, maxLife: 1, color: '#a5f3fc' });
+        if (fusedUnits > 0) addEvent(`🧬 ${fusedUnits} varelser har FUSERATS till starkare hybrider!`, wx, wy);
+      } else {
+        burst(wx, wy, '#67e8f9', 12, 1.5);
+      }
+      break;
+    }
   }
+}
+
+// ---------- Fusionshjälpare ----------
+function mixColor(hexA, hexB, t) {
+  const a = parseInt(hexA.slice(1), 16), b = parseInt(hexB.slice(1), 16);
+  const r = Math.round(((a >> 16) & 255) * (1 - t) + ((b >> 16) & 255) * t);
+  const g = Math.round(((a >> 8) & 255) * (1 - t) + ((b >> 8) & 255) * t);
+  const bl = Math.round((a & 255) * (1 - t) + (b & 255) * t);
+  return `rgb(${r},${g},${bl})`;
+}
+
+function fuseTwoUnits(a, b) {
+  const sameRace = a.race === b.race;
+  const spawnRace = sameRace ? a.race : 'hybrid';
+  const kid = spawnUnit(spawnRace, a.x, a.y, a.kingdomId != null ? a.kingdomId : b.kingdomId);
+  if (!kid) return false;
+  kid.maxHp = Math.max(a.maxHp, b.maxHp) + (sameRace ? 6 : 4);
+  kid.hp = kid.maxHp;
+  kid.traits = [...new Set([...a.traits, ...b.traits])].slice(0, 4);
+  kid.kills = a.kills + b.kills;
+  kid.age = Math.max(a.age, b.age);
+  kid.bornYear = Math.min(a.bornYear, b.bornYear);
+  if (sameRace) {
+    kid.tint = mixColor(RACES[a.race].color, '#fde68a', 0.45);
+    kid.name = choice(FIRST_NAMES) + ' den Sammanslagna';
+    kid.fusionLabel = `Två ${RACES[a.race].name}släktingar smält samman`;
+  } else {
+    kid.tint = mixColor(RACES[a.race].color, RACES[b.race].color, 0.5);
+    kid.name = choice(FIRST_NAMES) + ' ' + choice(EPITHETS);
+    kid.fusionLabel = `${RACES[a.race].icon}${RACES[a.race].name} + ${RACES[b.race].icon}${RACES[b.race].name}`;
+    kid.fromRaces = [a.race, b.race];
+  }
+  // Kungatronen: ärves av avkomman om föräldern var kung
+  const wasKing = a.isKing || b.isKing;
+  a.dead = true; b.dead = true; // markeras utan successionsbråk
+  if (wasKing && kid.kingdomId != null) {
+    const k = state.kingdoms[kid.kingdomId];
+    if (k && (k.kingId === a.id || k.kingId === b.id || k.kingId === -1)) {
+      kid.isKing = true;
+      k.kingId = kid.id;
+      k.kingName = kid.name;
+    }
+  }
+  return true;
+}
+
+function fuseUnitsNear(wx, wy, rad) {
+  const us = nearbyUnits(wx, wy, rad).filter(u => u.race !== 'monster');
+  if (us.length < 2) return 0;
+  const used = new Set();
+  let count = 0;
+
+  // Fas 1: blanda raser (riktig fusion -> hybrider)
+  for (let i = 0; i < us.length; i++) {
+    const A = us[i];
+    if (used.has(A.id)) continue;
+    for (let j = i + 1; j < us.length; j++) {
+      const B = us[j];
+      if (used.has(B.id) || A.race === B.race) continue;
+      if (fuseTwoUnits(A, B)) { used.add(A.id); used.add(B.id); count++; }
+      break;
+    }
+  }
+  // Fas 2: homogena par -> sammanslagna mästare
+  for (let i = 0; i < us.length; i++) {
+    const A = us[i];
+    if (used.has(A.id)) continue;
+    for (let j = i + 1; j < us.length; j++) {
+      const B = us[j];
+      if (used.has(B.id) || B.race !== A.race) continue;
+      if (fuseTwoUnits(A, B)) { used.add(A.id); used.add(B.id); count++; }
+      break;
+    }
+  }
+  return count;
+}
+
+function fuseCitiesNear(wx, wy, rad) {
+  const cs = state.cities.filter(c => dist2(c.x, c.y, wx, wy) <= rad * rad);
+  if (cs.length < 2) return 0;
+  cs.sort((a, b) => b.pop - a.pop);
+  const main = cs[0];
+  let merged = 0;
+  for (let i = 1; i < cs.length; i++) {
+    const c = cs[i];
+    main.pop += c.pop;
+    const addH = Math.min(c.houses, 14 - main.houses);
+    if (addH > 0) { main.houses += addH; state.totalBuildings += addH; }
+    if (c.temple) {
+      if (main.temple) state.totalTemples--;
+      else main.temple = true;
+    }
+    main.level = Math.min(8, Math.max(main.level, 1 + Math.floor((main.pop) / 25)));
+    const kc = state.kingdoms[c.kingdomId];
+    if (kc) kc.cities = Math.max(0, kc.cities - 1);
+    state.cities = state.cities.filter(x => x.id !== c.id);
+    addEvent(`🧬 FUSION: Staden ${c.name} har smält samman med ${main.name} – en megastad föds!`, main.x, main.y);
+    merged++;
+  }
+  return merged;
+}
+
+function mergeKingdoms(big, small) {
+  if (!big || !small || big === small) return false;
+  for (const u of state.units) {
+    if (u.kingdomId === small.id) {
+      u.kingdomId = big.id;
+      if (u.isKing) u.isKing = false;
+    }
+  }
+  for (const c of state.cities) if (c.kingdomId === small.id) c.kingdomId = big.id;
+  big.cities = state.cities.filter(c => c.kingdomId === big.id).length;
+  // Krigsförpliktelser förs vidare
+  for (const id of Array.from(small.warWith)) {
+    if (id === big.id) continue;
+    big.warWith.add(id);
+    const other = state.kingdoms[id];
+    if (other) { other.warWith.delete(small.id); other.warWith.add(big.id); }
+  }
+  state.kingdoms[small.id] = null;
+  addEvent(`🧬 RIKSFUSION: ${small.name} har gått upp i ${big.name} genom sammanslagning!`,
+    state.cities.find(c => c.kingdomId === big.id)?.x ?? W / 2,
+    state.cities.find(c => c.kingdomId === big.id)?.y ?? H / 2);
+  return true;
 }
 
 function findPower(id) {
@@ -1053,7 +1223,7 @@ function dissolveKingdom(k, reason) {
 }
 
 function updateCities() {
-  const fast = laws.fastGrowth ? 2.2 : 1;
+  const fast = laws.fastGrowth ? 3.0 : 1.4;
   for (const c of state.cities) {
     const k = state.kingdoms[c.kingdomId];
     if (!k) continue;
@@ -1069,7 +1239,7 @@ function updateCities() {
       }
     }
     fert = Math.max(0, fert);
-    const growth = (0.6 + fert * 0.05) * fast * rand(0.5, 1.3);
+    const growth = (1.1 + fert * 0.08) * fast * rand(0.5, 1.3);
     c.pop = Math.max(1, c.pop + growth);
 
     // Nya hus
@@ -1090,14 +1260,14 @@ function updateCities() {
     }
     // Försvarare föds
     const kUnits = state.units.filter(u => u.kingdomId === k.id).length;
-    if (kUnits < c.pop * 0.6 && state.units.length < 2400 && Math.random() < 0.5) {
+    if (kUnits < c.pop * 0.6 && state.units.length < MAX_UNITS && Math.random() < 0.5) {
       spawnUnit(k.race, c.x + randInt(-2, 2), c.y + randInt(-2, 2), k.id);
     }
     claimTiles(c);
 
     // Koloni: blommande stader sänder ut bosättare och grundar nya städer
-    const canColony = k.cities < 8 && (laws.fastGrowth ? c.pop > 35 : c.pop > 55);
-    if (canColony && Math.random() < 0.045) {
+    const canColony = k.cities < 14 && (laws.fastGrowth ? c.pop > 35 : c.pop > 55);
+    if (canColony && Math.random() < 0.09) {
         for (let tries = 0; tries < 12; tries++) {
           const ang = rand(0, Math.PI * 2), dd = randInt(10, 28);
           const nx = clamp(Math.round(c.x + Math.cos(ang) * dd), 2, W - 3);
@@ -1179,6 +1349,23 @@ function onNewYear() {
     }
   }
 
+  // Fredlig riksfusion: mycket större rike sväljer en svagare granne
+  if (Math.random() < 0.14) {
+    const ks = state.kingdoms.filter(Boolean);
+    if (ks.length >= 2) {
+      const big = choice(ks);
+      const candidates = ks.filter(k2 => k2 !== big && !big.warWith.has(k2.id));
+      if (candidates.length > 0) {
+        const small = choice(candidates);
+        const popBig = state.units.filter(u => u.kingdomId === big.id).length;
+        const popSmall = state.units.filter(u => u.kingdomId === small.id).length;
+        if (popBig > popSmall * 3 && Math.random() < 0.5) {
+          mergeKingdoms(big, small);
+        }
+      }
+    }
+  }
+
   updateFaithUI();
 }
 
@@ -1233,18 +1420,27 @@ function draw() {
     ctx.globalAlpha = 1;
   }
 
-  // Moln
-  if ($('#chkWeather').checked) {
-    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  // Moln – mjuk sprayad sprite
+  if ($('#chkWeather').checked && cloudSprite) {
     for (const c of state.clouds) {
       const sx = (c.x - cam.x) * z, sy = (c.y - cam.y) * z;
-      if (sx < -100 || sy < -60 || sx > viewportW + 100 || sy > viewportH + 60) continue;
-      ctx.beginPath();
-      ctx.ellipse(sx, sy, c.r * z, c.r * 0.55 * z, 0, 0, Math.PI * 2);
-      ctx.fill();
+      if (sx < -140 || sy < -90 || sx > viewportW + 140 || sy > viewportH + 90) continue;
+      ctx.globalAlpha = 0.55;
+      ctx.drawImage(cloudSprite, sx - c.r * z, sy - c.r * 0.6 * z, c.r * 2 * z, c.r * 1.2 * z);
+      ctx.globalAlpha = 1;
       c.x += c.s;
       if (c.x > W + 30) c.x = -30;
     }
+  }
+
+  // Säsongsstämning: varma sommarmånader, kalla vintermånader
+  const m = state.month;
+  if (m <= 2) {
+    ctx.fillStyle = 'rgba(255, 186, 90, 0.05)';
+    ctx.fillRect(0, 0, viewportW, viewportH);
+  } else if (m >= 6 && m <= 8) {
+    ctx.fillStyle = 'rgba(120, 175, 255, 0.06)';
+    ctx.fillRect(0, 0, viewportW, viewportH);
   }
 
   // Synligt område
@@ -1288,19 +1484,40 @@ function draw() {
   }
 
   // Enheter
+  const wantShadows = z > 1.3 && state.units.length < 4500;
   for (const u of state.units) {
     if (u.dead) continue;
     if (u.x < vx0 || u.x > vx1 || u.y < vy0 || u.y > vy1) continue;
     const sx = (u.x - cam.x + 0.5) * z, sy = (u.y - cam.y + 0.5) * z;
     const r = clamp((u.race === 'monster' ? 2.4 : 1.6) * Math.sqrt(z), 1, 6);
-    ctx.fillStyle = RACES[u.race].color;
+    // Skugga under fötterna
+    if (wantShadows) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.beginPath();
+      ctx.arc(sx + r * 0.35, sy + r * 0.4, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Kungar får en gyllene glöd
+    if (u.isKing && z > 0.9) {
+      ctx.shadowColor = 'rgba(251, 191, 36, 0.9)';
+      ctx.shadowBlur = 8;
+    }
+    ctx.fillStyle = u.tint || RACES[u.race].color;
     ctx.beginPath();
     ctx.arc(sx, sy, r, 0, Math.PI * 2);
     ctx.fill();
+    if (u.isKing) { ctx.shadowBlur = 0; }
     if (z > 1.4) {
       ctx.strokeStyle = 'rgba(0,0,0,0.5)';
       ctx.lineWidth = 0.7;
       ctx.stroke();
+    }
+    // Hybrider glittrar svagt
+    if (u.tint && z > 1.6) {
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.beginPath();
+      ctx.arc(sx - r * 0.3, sy - r * 0.3, Math.max(0.6, r * 0.25), 0, Math.PI * 2);
+      ctx.fill();
     }
     // Pestmarkering
     if (u.plague > 0 && z > 1) {
@@ -1319,19 +1536,32 @@ function draw() {
     }
   }
 
-  // Partiklar
+  // Partiklar – additiv blandning ger glöd
+  ctx.globalCompositeOperation = 'lighter';
   for (let i = state.particles.length - 1; i >= 0; i--) {
     const p = state.particles[i];
     p.life -= 0.03;
     if (p.life <= 0) { state.particles.splice(i, 1); continue; }
+    const sx = (p.x - cam.x) * z, sy = (p.y - cam.y) * z;
+    if (p.ring) {
+      // Expanderande chockvåg
+      const t = 1 - p.life / p.maxLife;
+      ctx.globalAlpha = (1 - t) * 0.85;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = Math.max(0.5, 3 * (1 - t));
+      ctx.beginPath();
+      ctx.arc(sx, sy, (p.r0 + t * (p.r1 - p.r0)) * z, 0, Math.PI * 2);
+      ctx.stroke();
+      continue;
+    }
     p.x += p.vx * 0.1; p.y += p.vy * 0.1;
     p.vx *= 0.96; p.vy *= 0.96;
-    const sx = (p.x - cam.x) * z, sy = (p.y - cam.y) * z;
     ctx.globalAlpha = clamp(p.life / p.maxLife, 0, 1);
     ctx.fillStyle = p.color;
     ctx.fillRect(sx, sy, p.size * z, p.size * z);
-    ctx.globalAlpha = 1;
   }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
 
   // Vald enhet
   if (state.selected && state.selected.type === 'unit') {
@@ -1357,6 +1587,12 @@ function draw() {
     ctx.arc(sx, sy, Math.max(r, 3), 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
+  }
+
+  // Vinjett – mjukt mörka hörn ger djup
+  if (vignette) {
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, viewportW, viewportH);
   }
 
   drawMinimap();
@@ -1549,7 +1785,7 @@ function renderInspector() {
         <div class="ins-stat-box"><span>Status</span><b>${u.plague > 0 ? '🦠 Sjuk' : u.frozen > 0 ? '🥶 Frusen' : 'Frisk'}</b></div>
         <div class="ins-stat-box"><span>Kordinater</span><b>${u.x},${u.y}</b></div>
       </div>
-      <div class="ins-traits">${u.traits.map(t => `<span class="trait-badge">${t}</span>`).join('')}</div>
+      <div class="ins-traits">${u.fusionLabel ? `<span class="trait-badge fusion-badge">${u.fusionLabel}</span>` : ''}${u.traits.map(t => `<span class="trait-badge">${t}</span>`).join('')}</div>
       <div class="ins-actions">
         <button class="btn-ins-act" id="actBlessUnit">⚡ Blesse</button>
         <button class="btn-ins-act" id="actSmitUnit">☄️ Smita</button>
@@ -1646,13 +1882,14 @@ function updateStatsUI() {
   $('#statBuildings').textContent = state.totalBuildings;
   $('#statTemples').textContent = state.totalTemples;
 
-  let h = 0, e = 0, d = 0, o = 0, a = 0, m = 0;
+  let h = 0, e = 0, d = 0, o = 0, a = 0, m = 0, hy = 0;
   for (const u of state.units) {
     switch (u.race) {
       case 'human': h++; break;
       case 'elf': e++; break;
       case 'dwarf': d++; break;
       case 'orc': o++; break;
+      case 'hybrid': hy++; break;
       case 'animal': a++; break;
       case 'monster': m++; break;
     }
@@ -1661,6 +1898,7 @@ function updateStatsUI() {
   $('#popElves').textContent = e;
   $('#popDwarves').textContent = d;
   $('#popOrcs').textContent = o;
+  $('#popHybrids').textContent = hy;
   $('#popAnimals').textContent = a;
   $('#popMonsters').textContent = m;
 }
@@ -1758,7 +1996,7 @@ function setupInput() {
       const [p1, p2] = Array.from(pointers.values());
       const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
       const midx = (p1.x + p2.x) / 2, midy = (p1.y + p2.y) / 2;
-      const newZoom = clamp(pinch.zoom0 * (dist / pinch.dist0), 0.35, 7);
+      const newZoom = clamp(pinch.zoom0 * (dist / pinch.dist0), 0.35, 20);
       const worldX = pinch.camX0 + pinch.mid0x / pinch.zoom0;
       const worldY = pinch.camY0 + pinch.mid0y / pinch.zoom0;
       cam.zoom = newZoom;
@@ -1831,7 +2069,7 @@ function setupInput() {
     const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
     const before = screenToWorld(sx, sy);
     const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-    cam.zoom = clamp(cam.zoom * factor, 0.35, 7);
+    cam.zoom = clamp(cam.zoom * factor, 0.35, 20);
     const after = screenToWorld(sx, sy);
     cam.x += before.x - after.x;
     cam.y += before.y - after.y;
@@ -1867,8 +2105,8 @@ function setupInput() {
   });
 
   // Zoom-knappar
-  $('#btnZoomIn').addEventListener('click', () => { cam.zoom = clamp(cam.zoom * 1.3, 0.35, 7); clampCam(); $('#camZoomLabel').textContent = cam.zoom.toFixed(1) + 'x'; });
-  $('#btnZoomOut').addEventListener('click', () => { cam.zoom = clamp(cam.zoom / 1.3, 0.35, 7); clampCam(); $('#camZoomLabel').textContent = cam.zoom.toFixed(1) + 'x'; });
+  $('#btnZoomIn').addEventListener('click', () => { cam.zoom = clamp(cam.zoom * 1.3, 0.35, 20); clampCam(); $('#camZoomLabel').textContent = cam.zoom.toFixed(1) + 'x'; });
+  $('#btnZoomOut').addEventListener('click', () => { cam.zoom = clamp(cam.zoom / 1.3, 0.35, 20); clampCam(); $('#camZoomLabel').textContent = cam.zoom.toFixed(1) + 'x'; });
   $('#btnResetCam').addEventListener('click', () => {
     cam.zoom = Math.min(viewportW / W, viewportH / H) * 0.97;
     cam.x = (W - viewportW / cam.zoom) / 2;
@@ -2020,12 +2258,12 @@ function populateWorld() {
   }
   const races = ['human', 'elf', 'dwarf', 'orc', 'animal'];
   spots.forEach((p, i) => {
-    spawnCluster(races[i], i === 4 ? 14 : 10, p.x, p.y);
+    spawnCluster(races[i], i === 4 ? 40 : 26, p.x, p.y);
   });
-  // Lite djur här och var
-  for (let i = 0; i < 8; i++) {
+  // Djurhérdar här och var
+  for (let i = 0; i < 14; i++) {
     const p = findLandPos();
-    if (p) spawnCluster('animal', 4, p.x, p.y);
+    if (p) spawnCluster('animal', 7, p.x, p.y);
   }
   // Ett monster någonstans
   const mp = findLandPos();
@@ -2050,6 +2288,34 @@ function resize() {
   canvas.height = Math.floor(viewportH * DPR);
   canvas.style.width = viewportW + 'px';
   canvas.style.height = viewportH + 'px';
+  // Vinjett-gradient (om skärmen finns)
+  if (viewportW > 0 && viewportH > 0 && ctx && ctx.createRadialGradient) {
+    const cx = viewportW / 2, cy = viewportH / 2;
+    const rad = Math.hypot(cx, cy) * 0.72;
+    const g = ctx.createRadialGradient(cx, cy, rad * 0.55, cx, cy, rad);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(2, 4, 12, 0.42)');
+    vignette = g;
+  }
+}
+
+function makeCloudSprite() {
+  const c = document.createElement('canvas');
+  c.width = 96; c.height = 64;
+  const g = c.getContext('2d');
+  // Tre överlappande mjuka bollar = mer molnigt
+  const blobs = [[30, 36, 24], [54, 30, 26], [72, 38, 20], [48, 42, 22]];
+  for (const [bx, by, br] of blobs) {
+    const grad = g.createRadialGradient(bx, by, 2, bx, by, br);
+    grad.addColorStop(0, 'rgba(255,255,255,0.5)');
+    grad.addColorStop(0.6, 'rgba(255,255,255,0.22)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(bx, by, br, 0, Math.PI * 2);
+    g.fill();
+  }
+  return c;
 }
 
 function mainLoop(now) {
@@ -2093,6 +2359,7 @@ function init() {
   canvas = $('#worldCanvas');
   ctx = canvas.getContext('2d');
   miniCtx = $('#minimapCanvas').getContext('2d');
+  cloudSprite = makeCloudSprite();
 
   // Offscreen terräng
   terrainCv = document.createElement('canvas');

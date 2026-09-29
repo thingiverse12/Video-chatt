@@ -1029,3 +1029,167 @@ body {
   .stat-chip:nth-child(3) { display: none; } /* även Kungariken göms på minsta skärmar */
   .power-grid { gap: 5px; }
 }
+
+/* ============================================================
+   PREMIUM POLISH – snyggare, glödande, fantasikänsla
+   ============================================================ */
+
+:root {
+  --panel-grad: linear-gradient(160deg, rgba(23, 33, 58, 0.96) 0%, rgba(15, 22, 40, 0.97) 100%);
+  --gold-glow: 0 0 14px rgba(251, 191, 36, 0.25);
+}
+
+/* Fantasi-rubriker */
+.brand h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  text-shadow: 0 2px 12px rgba(251, 191, 36, 0.35);
+}
+.panel-header h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.8px;
+}
+
+/* Toppfält: glaseffekt med gyllene underkant */
+.topbar {
+  background: linear-gradient(180deg, rgba(11, 17, 32, 0.97) 0%, rgba(17, 26, 46, 0.94) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.28);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Paneler: djup, kantbelysning, rundare hörn */
+.panel {
+  background: var(--panel-grad);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Statistikbrickor */
+.stat-chip {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.stat-value { text-shadow: 0 1px 6px rgba(56, 189, 248, 0.35); }
+
+/* Tro-meter: mjuk pulsering */
+.divine-bar { transition: box-shadow 0.4s; animation: faithPulse 3.2s ease-in-out infinite; }
+@keyframes faithPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(251, 191, 36, 0); }
+  50% { box-shadow: 0 0 18px rgba(251, 191, 36, 0.3); }
+}
+.faith-value { text-shadow: 0 0 10px rgba(253, 230, 138, 0.6); }
+
+/* Knappar: lyft vid hover,gradienter */
+.btn-action {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.28), rgba(37, 99, 235, 0.25));
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(56, 189, 248, 0.25); }
+.btn-reset {
+  background: linear-gradient(180deg, rgba(251, 113, 133, 0.28), rgba(190, 18, 60, 0.25));
+}
+.btn-reset:hover { box-shadow: 0 6px 16px rgba(251, 113, 133, 0.25); }
+
+.btn-speed.active {
+  background: linear-gradient(180deg, #fde68a, #f59e0b);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+}
+
+/* Gudakraftsknappar */
+.power-btn {
+  background: linear-gradient(180deg, rgba(21, 32, 56, 0.9), rgba(15, 23, 42, 0.9));
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.power-btn:hover { transform: translateY(-2px); }
+.power-btn.active {
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.34), rgba(217, 119, 6, 0.22));
+  border-color: #fbbf24;
+  box-shadow: var(--gold-glow), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.power-tab.active {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.32), rgba(37, 99, 235, 0.22));
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+/* Aktiv kraft-banner med guldram */
+.active-power-panel {
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  box-shadow: var(--gold-glow);
+}
+
+/* Kronikhändelser: inre glöd till vänster */
+.event-item {
+  box-shadow: inset 3px 0 10px -6px rgba(251, 191, 36, 0.8);
+  transition: background 0.15s, transform 0.12s;
+}
+.event-item:hover { transform: translateX(2px); }
+
+/* Kungsriken-kort */
+.kingdom-card {
+  background: linear-gradient(180deg, rgba(21, 32, 56, 0.85), rgba(15, 23, 42, 0.85));
+  border-radius: 9px;
+}
+.kingdom-banner {
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+.kingdom-card.selected {
+  box-shadow: var(--gold-glow);
+  border-color: #fbbf24;
+}
+
+/* Fusion-märke i inspektören */
+.fusion-badge {
+  background: linear-gradient(90deg, rgba(103, 232, 249, 0.25), rgba(192, 132, 252, 0.25));
+  border-color: rgba(103, 232, 249, 0.6);
+  color: #a5f3fc;
+}
+
+/* Flytande mobilknappar: guldgradient */
+.mobile-fab {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.97), rgba(15, 23, 42, 0.97));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(251, 191, 36, 0.18);
+}
+.fab-left {
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.3), rgba(180, 83, 9, 0.28));
+}
+
+/* Minimapa: glödande ram */
+.minimap-card {
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(56, 189, 248, 0.15);
+}
+#minimapCanvas { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6); }
+
+/* Snygga scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.5), rgba(99, 102, 241, 0.5));
+  border-radius: 8px;
+  border: 2px solid rgba(15, 23, 42, 0.8);
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.75); }
+* { scrollbar-width: thin; scrollbar-color: rgba(56, 189, 248, 0.5) rgba(15, 23, 42, 0.5); }
+
+/* HUD-piller: glas */
+.toggle-pill, .hud-btn {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.hud-btn:active { transform: scale(0.94); }
+
+/* Race-chips: färgade kanter */
+.race-chip { border-radius: 7px; border-left: 3px solid rgba(56, 189, 248, 0.5); }
+
+/* Mjuk övergång för inspektörens tillskott */
+.inspector-body { animation: fadeSlide 0.18s ease; }
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

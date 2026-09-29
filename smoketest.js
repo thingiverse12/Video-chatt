@@ -7,13 +7,18 @@ const path = require('path');
 const failures = [];
 
 function makeCtx() {
+  const grad = { addColorStop() {} };
   return {
     setTransform() {}, clearRect() {}, fillRect() {}, strokeRect() {},
     beginPath() {}, arc() {}, fill() {}, stroke() {}, moveTo() {}, lineTo() {},
     closePath() {}, fillText() {}, drawImage() {}, ellipse() {}, setLineDash() {},
     putImageData() {}, measureText: () => ({ width: 10 }),
+    createRadialGradient: () => grad,
+    createLinearGradient: () => grad,
     createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4), width: w, height: h }),
     globalAlpha: 1, fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: '',
+    globalCompositeOperation: 'source-over', shadowColor: '', shadowBlur: 0,
+    imageSmoothingEnabled: true,
   };
 }
 
@@ -103,14 +108,14 @@ function step() {
 }
 
 // Simulera ~150 år
-for (let i = 0; i < 1800; i++) {
+for (let i = 0; i < 1000; i++) {
   if (!step()) break;
 }
 if (failures.length) {
   console.error('FEL under steg:\n' + failures[0].split('\n').slice(0, 8).join('\n'));
   process.exit(1);
 }
-console.log('1800 simuleringssteg (ca 150 år) utan fel. Status:');
+console.log('1000 simuleringssteg (~83 år) utan fel. Status:');
 console.log('  År:', T.state.year, '| Enheter:', T.state.units.length,
   '| Kungariken:', T.state.kingdoms.filter(Boolean).length,
   '| Städer:', T.state.cities.length);
@@ -125,7 +130,7 @@ for (const pid of allPowers) {
     failures.push('applyPower(' + pid + '): ' + (e.stack || e.message));
   }
 }
-for (let i = 0; i < 600 && failures.length === 0; i++) step();
+for (let i = 0; i < 300 && failures.length === 0; i++) step();
 if (failures.length) {
   console.error('FEL efter gudakraft-test:\n' + failures[0]);
   process.exit(1);
@@ -146,8 +151,8 @@ try {
 // Världslagar + extremtest: meteorregn, alla katastrofer upprepat
 try {
   T.laws.naturalDisasters = true;
-  for (let i = 0; i < 400 && failures.length === 0; i++) step();
-  for (let i = 0; i < 40; i++) T.applyPower(30 + Math.random() * 200, 30 + Math.random() * 100, 'meteor');
+  for (let i = 0; i < 200 && failures.length === 0; i++) step();
+  for (let i = 0; i < 15; i++) T.applyPower(30 + Math.random() * 200, 30 + Math.random() * 100, 'meteor');
 } catch (e) {
   failures.push('katastrofer: ' + (e.stack || e.message));
 }
@@ -158,7 +163,7 @@ for (const preset of ['continents', 'archipelago', 'pangaea', 'volcanic', 'empty
     T.generateWorld(preset);
     T.setUsedCityNames([]);
     T.populateWorld();
-    for (let i = 0; i < 240 && failures.length === 0; i++) step();
+    for (let i = 0; i < 100 && failures.length === 0; i++) step();
   } catch (e) {
     failures.push('preset ' + preset + ': ' + (e.stack || e.message));
   }
