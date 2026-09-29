@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AETHELGARD – Gudasimulator & Planetbyggare</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Top Header Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="god-emblem" title="Du är planetens högsta gud">☀️</div>
+      <div>
+        <h1>AETHELGARD : PLANETGUD</h1>
+        <p class="subtitle">Forma kontinenter, skapa riken, ta emot tillbedjan & släpp lös katastrofer</p>
+      </div>
+    </div>
+
+    <!-- Divine Faith & World Era -->
+    <div class="divine-bar">
+      <div class="faith-meter" title="Gudomlig Tro genereras av dina invånare och deras tempel">
+        <span class="faith-icon">🙏</span>
+        <div>
+          <span class="faith-label">GUDOMLIG TRO</span>
+          <span class="faith-value" id="statFaith">∞ (Sandbox)</span>
+        </div>
+      </div>
+      <label class="sandbox-switch" title="Växla mellan Oändlig Gudakraft (Sandbox) och Tro-poäng">
+        <input type="checkbox" id="chkInfiniteFaith" checked />
+        <span>Fri Sandbox</span>
+      </label>
+    </div>
+
+    <!-- Live Planet Counters -->
+    <div class="top-stats">
+      <div class="stat-chip">
+        <span class="stat-label">År</span>
+        <span class="stat-value" id="statYear">År 1</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Invånare</span>
+        <span class="stat-value" id="statPop">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Kungariken</span>
+        <span class="stat-value" id="statKingdoms">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Byggnader</span>
+        <span class="stat-value" id="statBuildings">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Tempel</span>
+        <span class="stat-value" id="statTemples">0</span>
+      </div>
+    </div>
+
+    <!-- Time & Planet Generation Controls -->
+    <div class="top-controls">
+      <div class="speed-group" role="group" aria-label="Tidshastighet">
+        <button class="btn-speed" data-speed="0" title="Pausa tiden">⏸</button>
+        <button class="btn-speed active" data-speed="1" title="Normal tid">1x</button>
+        <button class="btn-speed" data-speed="2" title="Snabb tid">2x</button>
+        <button class="btn-speed" data-speed="5" title="Supersnabb historia">5x</button>
+      </div>
+      <select id="planetPresetSelect" class="preset-select" title="Välj planettyp för ny värld">
+        <option value="continents">🌍 Kontinenter</option>
+        <option value="archipelago">🏝️ Skärgård (Öar)</option>
+        <option value="pangaea">🏔️ Pangaea (Superkontinent)</option>
+        <option value="volcanic">🌋 Vulkanisk Värld</option>
+        <option value="empty">🌊 Tomt Hav (Bygg själv)</option>
+      </select>
+      <button class="btn-action" id="btnNewPlanet" title="Skapa en helt ny planet">🔄 Ny Planet</button>
+      <button class="btn-action btn-populate" id="btnAutoPopulate" title="Släpp ner startcivilisationer och djur över planeten">✨ Befolka</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+    <!-- Left Sidebar: God Powers & World Laws -->
+    <aside class="sidebar sidebar-left">
+      <!-- Active Power Banner -->
+      <section class="panel active-power-panel">
+        <div class="active-power-row">
+          <div class="active-power-icon" id="activePowerIcon">🔍</div>
+          <div class="active-power-info">
+            <div class="active-power-title" id="activePowerTitle">Inspektera & Välj</div>
+            <div class="active-power-desc" id="activePowerDesc">Klicka på en varelse eller stad för att se detaljer.</div>
+          </div>
+          <button class="btn-mini" id="btnInspectMode" title="Återgå till inspektionsläge (Escape)">🔍</button>
+        </div>
+        <!-- Brush Size Selector -->
+        <div class="brush-bar">
+          <span class="brush-label">Penselstorlek:</span>
+          <div class="brush-buttons" id="brushButtons">
+            <button class="brush-btn" data-size="1" title="1 ruta (Precisionspensel)">Punkt</button>
+            <button class="brush-btn active" data-size="3" title="Liten radie">Liten</button>
+            <button class="brush-btn" data-size="6" title="Medelstor radie">Medel</button>
+            <button class="brush-btn" data-size="11" title="Stor radie">Stor</button>
+            <button class="brush-btn" data-size="18" title="Enorm radie">Enorm</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- God Power Categories Tabs -->
+      <section class="panel powers-panel">
+        <div class="power-tabs" id="powerTabs">
+          <button class="power-tab active" data-tab="terraform">🌍 Natur</button>
+          <button class="power-tab" data-tab="life">👥 Liv & Riken</button>
+          <button class="power-tab" data-tab="miracles">✨ Mirakel</button>
+          <button class="power-tab" data-tab="disasters">☄️ Katastrof</button>
+        </div>
+
+        <!-- Power Buttons Container -->
+        <div class="power-grid" id="powerGrid"></div>
+      </section>
+
+      <!-- World Laws -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2>📜 Världslagar</h2>
+          <span class="panel-hint">Gudens regler</span>
+        </div>
+        <div class="laws-grid">
+          <label class="law-toggle">
+            <input type="checkbox" id="lawDiplomacy" checked />
+            <span>⚔️ Krig & Erobring</span>
+          </label>
+          <label class="law-toggle">
+            <input type="checkbox" id="lawNaturalDisasters" />
+            <span>🌋 Slumpkatastrofer</span>
+          </label>
+          <label class="law-toggle">
+            <input type="checkbox" id="lawFastGrowth" checked />
+            <span>🏛️ Snabb Utveckling</span>
+          </label>
+          <label class="law-toggle">
+            <input type="checkbox" id="lawMonsters" checked />
+            <span>🐉 Monster & Vilddjur</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Kingdoms & Civilizations List -->
+      <section class="panel panel-grow">
+        <div class="panel-header">
+          <h2>👑 Kungariken & Civilisationer</h2>
+          <span class="panel-hint" id="warsCountBadge">Fred i världen</span>
+        </div>
+        <div class="kingdom-list" id="kingdomList">
+          <p class="empty-hint">Placera Människor, Alver, Dvärgar eller Orcher på land för att grunda riken!</p>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Center Planet Viewport -->
+    <section class="viewport" id="viewport">
+      <canvas id="worldCanvas"></canvas>
+
+      <!-- Floating Top Overlay on Canvas -->
+      <div class="canvas-hud-top">
+        <div class="hud-toggles">
+          <label class="toggle-pill">
+            <input type="checkbox" id="chkBorders" checked />
+            <span>🗺️ Riksgränser</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="chkNames" checked />
+            <span>🏷️ Stadsnamn & Kungar</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="chkWeather" checked />
+            <span>☁️ Moln & Väder</span>
+          </label>
+        </div>
+
+        <div class="camera-controls">
+          <button class="hud-btn" id="btnZoomIn" title="Zooma in">＋</button>
+          <button class="hud-btn" id="btnZoomOut" title="Zooma ut">－</button>
+          <button class="hud-btn" id="btnResetCam" title="Visa hela planeten">🌍 Hela Planeten</button>
+        </div>
+      </div>
+
+      <!-- Bottom-left Controls Hint -->
+      <div class="canvas-hud-bottom-left">
+        <div class="hud-hint">
+          <span>🖱️ <b>Vänsterklick / Håll in:</b> Använd gudakraft</span>
+          <span>🖐️ <b>Högerklick + Dra (eller Mellanslag+Dra):</b> Panorera</span>
+          <span>⚙️ <b>Scrollhjul:</b> Zooma</span>
+        </div>
+      </div>
+
+      <!-- Bottom-right Minimap -->
+      <div class="minimap-card">
+        <div class="minimap-header">
+          <span>PLANETÖVERSIKT</span>
+          <span id="camZoomLabel">1.0x</span>
+        </div>
+        <canvas id="minimapCanvas" width="220" height="143"></canvas>
+      </div>
+    </section>
+
+    <!-- Right Sidebar: Inspector (Creature / Kingdom) & World Chronicle -->
+    <aside class="sidebar sidebar-right">
+      <!-- Dynamic Inspector Panel -->
+      <section class="panel inspector-panel">
+        <div class="panel-header">
+          <h2 id="inspectorHeaderTitle">👁️ Gudomligt Öga</h2>
+          <div class="inspector-nav">
+            <button class="btn-mini" id="btnFindKing" title="Hitta en kung eller hjälte">👑 Kung</button>
+            <button class="btn-mini" id="btnFollowUnit" title="Följ vald varelse med kameran">🎯 Följ</button>
+          </div>
+        </div>
+
+        <div id="inspectorBody" class="inspector-body">
+          <!-- Populated dynamically by game.js -->
+        </div>
+      </section>
+
+      <!-- Population Breakdown by Race -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2>📊 Planetens Befolkning</h2>
+        </div>
+        <div class="race-stats-grid" id="raceStatsGrid">
+          <div class="race-chip"><span>🧑 Människor</span><b id="popHumans">0</b></div>
+          <div class="race-chip"><span>🧝 Alver</span><b id="popElves">0</b></div>
+          <div class="race-chip"><span>🧔 Dvärgar</span><b id="popDwarves">0</b></div>
+          <div class="race-chip"><span>👹 Orcher</span><b id="popOrcs">0</b></div>
+          <div class="race-chip"><span>🐑 Djur</span><b id="popAnimals">0</b></div>
+          <div class="race-chip"><span>🐉 Monster</span><b id="popMonsters">0</b></div>
+        </div>
+      </section>
+
+      <!-- World Chronicle / History Log -->
+      <section class="panel panel-grow">
+        <div class="panel-header">
+          <h2>📖 Världskrönikan</h2>
+          <span class="panel-hint">Klicka för att hoppa dit</span>
+        </div>
+        <div class="event-feed" id="chronicleFeed"></div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/game.js"></script>
+</body>
+</html>

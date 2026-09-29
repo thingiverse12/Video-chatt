@@ -1,31 +1,20 @@
 const express = require('express');
+const path = require('path');
+
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0';
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-io.on('connection', (socket) => {
-  console.log('Användare ansluten:', socket.id);
-
-  socket.on('offer', (data) => {
-    socket.broadcast.emit('offer', data);
-  });
-
-  socket.on('answer', (data) => {
-    socket.broadcast.emit('answer', data);
-  });
-
-  socket.on('candidate', (data) => {
-    socket.broadcast.emit('candidate', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Användare kopplad från:', socket.id);
-  });
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', agents: 1000 });
 });
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
-  console.log(`Server lyssnar på port ${PORT}`);
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, HOST, () => {
+  console.log(`Simuleringsserver körs på http://${HOST}:${PORT}`);
 });

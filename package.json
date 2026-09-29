@@ -1,11 +1,12 @@
 {
-  "name": "video-chatt",
+  "name": "1000-autonoma-agenter",
   "version": "1.0.0",
+  "description": "Öppen världssimulering med 1 000 autonoma agenter med fri vilja",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node smoketest.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "express": "^4.18.2"
   }
 }
