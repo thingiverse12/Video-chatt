@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RUST MVP — överlev på ön</title>
+<link rel="stylesheet" href="/css/style.css">
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/build/three.module.min.js" } }
+</script>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<!-- ========================= HUD ========================= -->
+<div id="hud" class="hidden">
+
+  <div id="vignette"></div>
+  <div id="coldvignette"></div>
+  <div id="waterOverlay"></div>
+
+  <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
+  <div id="hitmark"></div>
+
+  <div id="topleft">
+    <div id="compass"><span>N</span></div>
+    <div id="minimap"><canvas id="mapcv" width="176" height="176"></canvas></div>
+    <div id="clockbox"><span id="clockicon">☀</span><span id="clocktext">06:00</span><span id="daynum">Dag 1</span></div>
+  </div>
+
+  <div id="topright">
+    <div id="serverinfo">
+      <span id="playercount">1 spelare</span> · <span id="ping">0 ms</span> · <span id="fps">60 fps</span>
+    </div>
+    <div id="roster"></div>
+  </div>
+
+  <div id="vitals">
+    <div class="bar" id="bar-hp"><label>❤</label><div class="track"><i style="width:100%"></i></div><span>100</span></div>
+    <div class="bar" id="bar-hunger"><label>🍖</label><div class="track"><i style="width:100%"></i></div><span>100</span></div>
+    <div class="bar" id="bar-thirst"><label>💧</label><div class="track"><i style="width:100%"></i></div><span>100</span></div>
+    <div class="bar" id="bar-temp"><label>🌡</label><div class="track"><i style="width:100%"></i></div><span>70</span></div>
+  </div>
+
+  <div id="hotbar"></div>
+  <div id="heldname"></div>
+
+  <div id="interact"></div>
+  <div id="buildhint"></div>
+  <div id="toasts"></div>
+  <div id="dmgnums"></div>
+  <div id="chatlog"></div>
+  <div id="chatinput"><input id="chatfield" type="text" maxlength="180" placeholder="Meddelande… (Enter skickar)"></div>
+
+  <!-- Inventarie -->
+  <div id="invpanel" class="panel hidden">
+    <h2>Inventarie <small>Tab</small></h2>
+    <div class="invgrid" id="invgrid"></div>
+    <div class="hint">Klicka: flytta · Högerklick: dela · Shift+klick: släpp · 1–6 väljs med hotbar</div>
+    <div id="iteminfo"></div>
+  </div>
+
+  <!-- Crafting -->
+  <div id="craftpanel" class="panel hidden">
+    <h2>Crafting <small>C</small></h2>
+    <div id="craftlist"></div>
+    <div class="hint">Klicka = crafta 1 · Shift+klick = 5 (max 20 per gång)</div>
+  </div>
+
+  <!-- Byggläge -->
+  <div id="buildpanel" class="panel hidden">
+    <h2>Bygg <small>B</small></h2>
+    <div id="buildlist"></div>
+    <div class="hint">Vänsterklick = placera · Högerklick/F = rotera · U = uppgradera · X = riva · B/Esc = avbryt</div>
+  </div>
+
+  <!-- Förvaringslåda -->
+  <div id="boxpanel" class="panel hidden">
+    <h2>Förvaringslåda <small>E</small></h2>
+    <div class="twocol">
+      <div><h3>Låda</h3><div class="invgrid small" id="boxgrid"></div></div>
+      <div><h3>Ditt inventarie</h3><div class="invgrid" id="boxinv"></div></div>
+    </div>
+    <div class="hint">Klicka på ett föremål för att flytta det · Esc stänger</div>
+  </div>
+
+  <!-- Död -->
+  <div id="deathscreen" class="hidden">
+    <h1>DU DOG</h1>
+    <p id="deathcause"></p>
+    <button id="respawnbtn">Respawna</button>
+    <p class="small" id="respawntimer"></p>
+  </div>
+
+  <div id="pausehint" class="hidden">Klicka för att spela</div>
+</div>
+
+<!-- ========================= MENY ========================= -->
+<div id="menu">
+  <div id="menuinner">
+    <h1>RUST <span>MVP</span></h1>
+    <p class="tagline">Samla. Crafta. Bygg. Överlev. Dö. Försök igen.</p>
+
+    <div id="connectbox">
+      <label for="namefield">Ditt namn</label>
+      <input id="namefield" type="text" maxlength="16" placeholder="Namn" autocomplete="off">
+      <button id="playbtn">Anslut till ön</button>
+      <div id="menustatus">Ansluter till servern…</div>
+    </div>
+
+    <div id="menugrid">
+      <div>
+        <h3>Kontroller</h3>
+        <table id="keytable"></table>
+      </div>
+      <div>
+        <h3>Kärnloop</h3>
+        <ol class="loop">
+          <li>Slå på träd och sten med händerna</li>
+          <li>Crafta stenyxa och stenhacka (C)</li>
+          <li>Samla trä, sten och metall</li>
+          <li>Bygg golv, väggar, dörr och tak (B)</li>
+          <li>Drick vid vatten, ät bär, håll dig varm vid elden</li>
+          <li>Uppgradera basen till sten och metall (U)</li>
+        </ol>
+        <h3>Inställningar</h3>
+        <label class="cbx"><input type="checkbox" id="optshadows" checked> Skuggor</label>
+        <label class="cbx"><input type="checkbox" id="optsens"> Omvänd mus Y</label>
+        <div class="slider"><label>Muskänslighet</label><input type="range" id="optsensivity" min="20" max="300" value="100"></div>
+        <div class="slider"><label>Synfält (FOV)</label><input type="range" id="optfov" min="60" max="100" value="74"></div>
+      </div>
+    </div>
+    <p class="foot">Servrar: <span id="menuping">–</span> · Frö <span id="menuseed">–</span> · <a href="/legacy" target="_blank">gamla videochatten</a></p>
+  </div>
+</div>
+
+<div id="loading" class="hidden"><div class="spin"></div><p>Bygger världen…</p></div>
+<div id="errbox" class="hidden"></div>
+
+<script type="module" src="/js/main.js"></script>
+</body>
+</html>

@@ -1,11 +1,22 @@
 {
-  "name": "video-chatt",
-  "version": "1.0.0",
+  "name": "rust-mvp",
+  "version": "0.1.0",
+  "description": "Rust-liknande multiplayer-survival MVP (Three.js + Node + Socket.io)",
+  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "smoke": "node tools/smoke.js",
+    "unit": "SAVE_FILE=data/unit-save.json node tools/unit-build.js",
+    "clienttest": "SAVE_FILE=data/client-save.json node tools/client-headless.js",
+    "test": "npm run unit && npm run clienttest && npm run smoke"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "three": "0.160.0"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.7.5"
   }
 }
