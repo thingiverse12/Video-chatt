@@ -14,6 +14,11 @@ node server/index.js      # eller: npm start
 enheter på samma nätverk) för att spela flera spelare mot varandra – alla ansluter till
 samma server.
 
+Spelet använder **muslås** (pointer lock) för att styra kameran. Om vyn körs inbäddad
+(t.ex. i en iframe som inte tillåter muslås) upptäcker spelet det automatiskt och byter
+till **drag-läge**: håll in vänster musknapp och rör musen för att titta, och släpp för
+att slå/samla. En gul ledtråd visas högst upp när det läget är aktivt.
+
 ---
 
 ## Kärnloopen (MVP-målet)
@@ -43,7 +48,7 @@ Start → samla → crafta → bygga → överleva → uppgradera. Exempel på v
 | `1–0`, mushjul | Välj hotbar-plats |
 | `F` | Ät / använd föremålet i handen |
 | `Enter` | Chatt |
-| `Esc` | Pausmeny med kontroller |
+| `Esc` | Pausmeny med kontroller (Esc igen, klicka utanför rutan eller tryck ▶ Fortsätt spelar för att gå tillbaka) |
 
 ---
 

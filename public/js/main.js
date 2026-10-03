@@ -11,7 +11,7 @@ import { Interactions } from './interact.js';
 import { Hud } from './hud.js';
 import { World, CONFIG, NODE_TYPES } from '../../shared/worldgen.js';
 import { BuildingIndex, pieceAABB } from '../../shared/building.js';
-import { ITEMS, itemName } from '../../shared/items.js';
+import { ITEMS, EQUIP, itemName } from '../../shared/items.js';
 
 const canvas = document.getElementById('game');
 const net = new Net();
@@ -118,10 +118,11 @@ net.on('welcome', (msg) => {
   setEquipped(msg.you.equipped);
   hud.hideMenu();
   hud.playing = true;
+  hud.paused = false;
   hud.toast(`Välkommen ${msg.you.name}! ${msg.online} spelare online`, 'good');
   hud.addChat({ system: true, msg: `Välkommen till ön! Samla trä med vänster mus och bygg med B.` });
   net.startPing();
-  requestPointerLock();
+  requestLock();
   startLoop();
 });
 
@@ -231,7 +232,7 @@ net.on('respawned', (msg) => {
   state.player.alive = true;
   hud.hideDeath();
   hud.toast('Du är tillbaka på ön', 'good');
-  canvas.requestPointerLock?.();
+  requestLock();
 });
 net.on('hurt', (msg) => {
   document.body.classList.add('hurt');
@@ -274,6 +275,16 @@ function addBag(bag) {
 function setEquipped(item) {
   state.equipped = item || 'hand';
   state.renderer.setViewModel(state.equipped);
+}
+
+/** Visa pausmenyn och släpp alla tangenter så att spelaren inte går iväg */
+function pauseGame() {
+  const p = state.player;
+  if (p) {
+    p.keys.clear();
+    p.mouseDown = false;
+  }
+  hud.showPauseMenu();
 }
 
 function setBuildKind(kind) {
@@ -411,7 +422,11 @@ addEventListener('keydown', (e) => {
       setBuildKind(null);
       return;
     }
-    hud.showPauseMenu();
+    if (hud.isPaused()) {
+      hud.resume();
+      return;
+    }
+    pauseGame();
     return;
   }
   if (e.code.startsWith('Digit')) {
@@ -434,61 +449,151 @@ addEventListener('keyup', (e) => {
   state.player?.keys.delete(e.code);
 });
 
-canvas.addEventListener('mousedown', (e) => {
-  if (!state.playing || hud.isPanelOpen()) return;
-  if (document.pointerLockElement !== document.body && !hud.chatOpen) {
-    requestPointerLock();
+// ------------------------------------------------- muspekare (lås eller drag)
+// Obs: muslåset sätts på canvasen, inte på <body>. Alla jämförelser måste gälla
+// canvasen, annars tror koden att låset släpps så fort det tas (och pausmenyn
+// poppar upp direkt).
+let lockMode = 'unknown'; // 'locked' | 'fallback'
+let lockTimer = null;
+let holdTimer = null;
+let lookDrag = null;
+
+const isLocked = () => document.pointerLockElement === canvas;
+
+function requestLock() {
+  if (lockMode === 'fallback') return;
+  try {
+    canvas.requestPointerLock?.();
+  } catch {
+    enterFallbackLook();
     return;
   }
-  const p = state.player;
-  if (e.button === 0) {
-    if (p.buildMode) {
-      if (state.interact.place()) hud.playPlaceFeedback?.();
-    } else if (state.interact.startDraw()) {
-      // pilbåge: ladda
-    } else {
-      p.mouseDown = true;
-      state.interact.lastHit = 0;
+  clearTimeout(lockTimer);
+  lockTimer = setTimeout(() => {
+    if (state.playing && !isLocked() && !hud.isPanelOpen() && !hud.chatOpen && !document.body.classList.contains('dead')) {
+      enterFallbackLook();
     }
-  } else if (e.button === 2) {
-    if (p.buildMode) setBuildKind(null);
+  }, 800);
+}
+
+/** Vissa inbäddade vyer (iframes) tillåter inte muslås – då tittar man genom att dra */
+function enterFallbackLook() {
+  clearTimeout(lockTimer);
+  if (lockMode === 'fallback') return;
+  lockMode = 'fallback';
+  document.body.classList.add('nolock');
+  if (hud.isPaused()) hud.hideMenu();
+  hud.toast('Den här vyn tillåter inte muslås – håll in vänster musknapp och rör musen för att titta', '');
+}
+
+hud.onResume = () => requestLock();
+
+function primaryDown() {
+  const p = state.player;
+  if (!p) return;
+  if (p.buildMode) state.interact.place();
+  else if (state.interact.startDraw()) {
+    /* pilbågen laddas */
+  } else {
+    p.mouseDown = true;
+    state.interact.lastHit = 0;
   }
+}
+
+function primaryRelease() {
+  const p = state.player;
+  if (!p) return;
+  p.mouseDown = false;
+  state.interact.releaseDraw();
+}
+
+/** Ett snabbt klick i drag-läget: bygg, skjut eller slå en gång */
+function primaryTap() {
+  const p = state.player;
+  if (!p) return;
+  if (p.buildMode) {
+    state.interact.place();
+    return;
+  }
+  const eq = EQUIP[state.equipped] || EQUIP.hand;
+  state.renderer.playSwing?.();
+  net.send({ t: 'hit', dir: p.getDir().toArray(), draw: eq.type === 'ranged' ? 0.6 : undefined });
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  if (!state.playing || hud.isPanelOpen() || hud.chatOpen) return;
+  if (document.body.classList.contains('dead')) return;
+  if (e.button === 2) {
+    if (state.player.buildMode) setBuildKind(null);
+    return;
+  }
+  if (e.button !== 0) return;
+
+  if (lockMode === 'fallback') {
+    lookDrag = { moved: 0, t: performance.now(), dragged: false, consumed: false };
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      if (lookDrag && !lookDrag.dragged) {
+        lookDrag.consumed = true;
+        primaryDown();
+      }
+    }, 200);
+    return;
+  }
+  if (!isLocked()) {
+    requestLock();
+    return;
+  }
+  primaryDown();
 });
 
 addEventListener('mouseup', (e) => {
   const p = state.player;
-  if (!p) return;
-  if (e.button === 0) {
-    p.mouseDown = false;
-    state.interact.releaseDraw();
+  if (!p || e.button !== 0) return;
+  clearTimeout(holdTimer);
+  if (lockMode === 'fallback' && lookDrag) {
+    const drag = lookDrag;
+    lookDrag = null;
+    if (drag.consumed) primaryRelease();
+    else if (!drag.dragged) primaryTap();
+    return;
   }
+  primaryRelease();
 });
 
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
 addEventListener('mousemove', (e) => {
-  if (document.pointerLockElement === document.body) {
-    state.player?.applyLook(e.movementX, e.movementY);
+  if (isLocked()) {
+    state.player?.applyLook(e.movementX || 0, e.movementY || 0);
+    return;
+  }
+  if (lookDrag && lockMode === 'fallback' && state.player) {
+    lookDrag.moved += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
+    if (lookDrag.moved > 6) lookDrag.dragged = true;
+    if (lookDrag.dragged) state.player.applyLook(e.movementX || 0, e.movementY || 0);
   }
 });
+
+// nekas muslåset (t.ex. i en inbäddad vy) går vi över till drag-läget
+document.addEventListener('pointerlockerror', () => enterFallbackLook());
 
 document.addEventListener('pointerlockchange', () => {
-  const unlocked = document.pointerLockElement !== document.body;
-  if (unlocked && state.playing && !hud.isPanelOpen() && !hud.chatOpen && !document.body.classList.contains('dead')) {
-    hud.showPauseMenu();
-  } else if (!unlocked) {
+  if (isLocked()) {
+    lockMode = 'locked';
+    clearTimeout(lockTimer);
+    document.body.classList.remove('nolock');
     hud.hideMenu();
+    return;
   }
+  if (lockMode === 'fallback') return; // ingen låsning att tappa
+  if (state.playing && !hud.isPanelOpen() && !hud.chatOpen && !document.body.classList.contains('dead')) pauseGame();
 });
 
-function requestPointerLock() {
-  canvas.requestPointerLock?.();
-}
-
 canvas.addEventListener('click', () => {
-  if (!state.playing) return;
-  if (document.body.classList.contains('dead')) return;
-  if (document.pointerLockElement !== document.body && !hud.chatOpen && !hud.isPanelOpen()) canvas.requestPointerLock?.();
+  if (!state.playing || lockMode === 'fallback') return;
+  if (document.body.classList.contains('dead') || hud.chatOpen || hud.isPanelOpen()) return;
+  if (!isLocked()) requestLock();
 });
 
 // mushjul byter hotbar-plats

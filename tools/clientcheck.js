@@ -90,6 +90,17 @@ try {
   process.exit(1);
 }
 
+// 1b. statisk kontroll av muspekarlogiken (muslåset sätts på canvasen!)
+const mainSrc = readFileSync(resolve(ROOT, 'public/js/main.js'), 'utf8');
+check(
+  'Muslåset jämförs med canvasen, inte med <body>',
+  mainSrc.includes('document.pointerLockElement === canvas') && !/pointerLockElement\s*!==\s*document\.body/.test(mainSrc)
+);
+check(
+  'Det finns ett drag-läge när muslås nekas (inbäddade vyer)',
+  mainSrc.includes('enterFallbackLook') && mainSrc.includes("classList.add('nolock')") && mainSrc.includes('pointerlockerror')
+);
+
 // 2. HUD mot den riktiga index.html (fångar saknade element-id:n)
 let hud;
 try {
@@ -124,6 +135,36 @@ try {
   );
   check('HUD: kyla markeras i gränssnittet', document.querySelector('.vital.warmth').classList.contains('cold'));
   check('HUD: dödskärmen visas', document.body.classList.contains('dead'));
+
+  // pausmenyn måste gå att lämna – det var en bugg att knappen låg i en gömd förälder
+  const hiddenAncestor = (el) => {
+    let node = el;
+    while (node && node !== document.body) {
+      if (node.style && node.style.display === 'none') return node.id || node.tagName;
+      node = node.parentElement;
+    }
+    return null;
+  };
+  document.body.classList.remove('dead');
+  hud.playing = true;
+  hud.showPauseMenu();
+  const blocker = hiddenAncestor(document.getElementById('resumeBtn'));
+  check(
+    'Pausmenyn: "Fortsätt spela" syns och menyn är aktiv',
+    hud.isPaused() && !blocker,
+    blocker ? `gömd av #${blocker}` : 'synlig'
+  );
+  document.getElementById('resumeBtn').click();
+  check('Pausmenyn: knappen stänger menyn', !hud.isPaused() && document.getElementById('menu').style.display === 'none');
+  hud.showPauseMenu();
+  hud.resume();
+  check('Pausmenyn: resume() (Esc) stänger menyn', !hud.isPaused());
+  document.body.classList.add('dead');
+  hud.showPauseMenu();
+  check('Pausmenyn lägger sig inte ovanpå dödskärmen', !hud.isPaused());
+  document.body.classList.remove('dead');
+  hud.showMenu('Anslut igen');
+  check('Startmenyn återställs efter paus', document.getElementById('joinForm').style.display === '' && document.getElementById('pauseBox').style.display === 'none');
 } catch (err) {
   check('HUD: hotbar, mätare, paneler och chatt renderas i DOM', false, err.message);
   console.error(err);
@@ -146,6 +187,17 @@ try {
   const dist = Math.hypot(player.body.x - start.x, player.body.z - start.z);
   check('Klienten förutsäger gång framåt', dist > 5, `${dist.toFixed(2)} m på 2 s`);
   check('Klienten håller sig ovanför marken', player.body.y >= world.heightAt(player.body.x, player.body.z) - 0.01, `y=${player.body.y.toFixed(2)}`);
+
+  // musblicken: får inte blockeras av muslås-kontroller
+  const beforeLook = { yaw: player.body.yaw, pitch: player.body.pitch };
+  player.applyLook(120, 60);
+  check(
+    'Musblicken roterar kameran (även utan muslås)',
+    Math.abs(player.body.yaw - beforeLook.yaw) > 0.1 && Math.abs(player.body.pitch - beforeLook.pitch) > 0.05,
+    `yaw ${beforeLook.yaw.toFixed(2)}→${player.body.yaw.toFixed(2)}, pitch ${beforeLook.pitch.toFixed(2)}→${player.body.pitch.toFixed(2)}`
+  );
+  player.applyLook(0, 100000);
+  check('Kameran kan inte vinklas förbi rakt upp/ner', Math.abs(player.body.pitch) < 1.56, `pitch ${player.body.pitch.toFixed(2)}`);
 
   // samma startläge ska ge samma resultat på server och klient (delad fysik)
   const { stepBody, createBody } = await load('shared/movement.js');

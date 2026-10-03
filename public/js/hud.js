@@ -60,6 +60,7 @@ export class Hud {
       nameInput: $('nameInput'),
       joinBtn: $('joinBtn'),
       resumeBtn: $('resumeBtn'),
+      pauseBox: $('pauseBox'),
       serverinfo: $('serverinfo'),
       disconnect: $('disconnect'),
       disconnectText: $('disconnectText'),
@@ -82,6 +83,8 @@ export class Hud {
     };
     this.chatOpen = false;
     this.playing = false;
+    this.paused = false;
+    this.onResume = null;
     this._buildHotbar();
     this._bind();
   }
@@ -133,9 +136,10 @@ export class Hud {
       this.onJoin?.(this.el.nameInput.value.trim());
     });
     this.el.reconnectBtn.addEventListener('click', () => location.reload());
-    this.el.resumeBtn.addEventListener('click', () => {
-      this.hideMenu();
-      document.getElementById('game')?.requestPointerLock?.();
+    this.el.resumeBtn.addEventListener('click', () => this.resume());
+    // klick utanför rutan (eller var som helst i pausmenyn) fortsätter spelet
+    this.el.menu.addEventListener('click', (e) => {
+      if (this.paused && !e.target.closest('.menu-card')) this.resume();
     });
   }
 
@@ -147,25 +151,40 @@ export class Hud {
 
   showMenu(status) {
     if (status) this.el.menuStatus.textContent = status;
+    this.paused = false;
     this.el.joinForm.style.display = '';
-    this.el.joinBtn.style.display = '';
-    this.el.resumeBtn.style.display = 'none';
+    this.el.pauseBox.style.display = 'none';
     this.el.menu.style.display = 'flex';
   }
 
   /** Pausvy mitt i spelet: visa kontroller och låt spelaren hoppa tillbaka */
   showPauseMenu() {
-    if (!this.playing) return;
+    if (!this.playing || this.paused) return;
+    if (document.body.classList.contains('dead')) return; // dödskärmen sköter sig själv
+    this.paused = true;
     this.el.menuStatus.textContent = 'Spelet fortsätter på servern – du är kvar på ön.';
     this.el.joinForm.style.display = 'none';
-    this.el.joinBtn.style.display = 'none';
-    this.el.resumeBtn.style.display = 'inline-block';
+    this.el.pauseBox.style.display = 'inline-block';
     this.el.menu.style.display = 'flex';
     document.exitPointerLock?.();
   }
 
+  isPaused() {
+    return this.paused;
+  }
+
+  /** Lämna pausmenyn och ta tillbaka muspekaren */
+  resume() {
+    if (!this.playing) return;
+    this.hideMenu();
+    if (this.onResume) this.onResume();
+    else document.getElementById('game')?.requestPointerLock?.();
+  }
+
   hideMenu() {
+    this.paused = false;
     this.el.menu.style.display = 'none';
+    this.el.pauseBox.style.display = 'none';
     document.body.classList.remove('disconnected');
   }
 

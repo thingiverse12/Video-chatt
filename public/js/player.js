@@ -70,8 +70,9 @@ export class LocalPlayer {
     return { x: this.body.x, y: this.body.y + PLAYER.eye, z: this.body.z };
   }
 
+  /** Rotera kameran. Anroparen avgör om vi har muslås eller drag-läge. */
   applyLook(dx, dy) {
-    if (this.inventoryOpen || document.pointerLockElement !== document.body) return;
+    if (this.inventoryOpen || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
     this.body.yaw -= dx * this.sensitivity;
     this.body.pitch -= dy * this.sensitivity;
     const max = Math.PI / 2 - 0.02;

@@ -40,6 +40,7 @@
     <div id="hotbar"></div>
 
     <div id="hint"></div>
+    <div id="nolockhint">🖱️ Håll in <b>vänster musknapp</b> och rör musen för att titta</div>
     <div id="fxlayer"></div>
     <div id="toasts"></div>
 
@@ -133,8 +134,11 @@
             <input id="nameInput" maxlength="16" placeholder="t.ex. Björn" required minlength="2" />
           </label>
           <button type="submit" class="primary" id="joinBtn">Anslut till servern</button>
-          <button type="button" class="primary" id="resumeBtn" style="display:none">▶ Fortsätt spela</button>
         </form>
+        <div id="pauseBox" style="display:none">
+          <button type="button" class="primary" id="resumeBtn">▶ Fortsätt spela</button>
+          <p class="small">…eller tryck <b>Esc</b> igen, eller klicka utanför rutan.</p>
+        </div>
         <div id="menuStatus" class="status"></div>
         <div class="serverinfo" id="serverinfo"></div>
         <div class="controls">
@@ -146,7 +150,7 @@
             <span><b>E</b> interagera (dörr, låda, påse)</span><span><b>R</b> riv byggdel</span>
             <span><b>B</b> byggmeny</span><span><b>Tab</b> inventarie &amp; hantverk</span>
             <span><b>1–0</b> hotbar</span><span><b>F</b> ät / använd</span>
-            <span><b>Enter</b> chatt</span><span><b>Esc</b> släpp musen</span>
+            <span><b>Enter</b> chatt</span><span><b>Esc</b> pausmeny / tillbaka</span>
           </div>
           <h3>Mål med MVP:n</h3>
           <p class="small">Spawna → samla → hantverka → bygg ett litet skydd → hitta andra spelare → överlev → dö/respawna → fortsätt uppgradera.</p>
