@@ -107,6 +107,7 @@ export class World3D {
 
     this._makeSky();
     this.tod = 0.3;
+    this.setEnvironment(0.32, null, false);   // så att himlen inte är svart före init
     this.resize();
   }
 
