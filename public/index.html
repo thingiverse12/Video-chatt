@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>RUST MVP – överlevnad på ön</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪓</text></svg>" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="ui">
+    <div id="crosshair"><span></span><span></span></div>
+
+    <div id="topbar">
+      <div class="pill" id="infoOnline">– online</div>
+      <div class="pill" id="infoClock">Dag 1 – 08:00</div>
+      <div class="pill" id="infoTemp">☀️</div>
+      <div class="pill" id="infoPing">– ms</div>
+      <div class="pill" id="infoPos">0, 0</div>
+    </div>
+
+    <div id="killfeed"></div>
+
+    <div id="vitals">
+      <div class="vital hp"><div class="label">❤️</div><div class="bar"><i id="barHp"></i></div><div class="num" id="numHp">100</div></div>
+      <div class="vital hunger"><div class="label">🍖</div><div class="bar"><i id="barHunger"></i></div><div class="num" id="numHunger">100</div></div>
+      <div class="vital thirst"><div class="label">💧</div><div class="bar"><i id="barThirst"></i></div><div class="num" id="numThirst">100</div></div>
+      <div class="vital warmth"><div class="label">🔥</div><div class="bar"><i id="barWarmth"></i></div><div class="num" id="numWarmth">100</div></div>
+    </div>
+
+    <div id="hotbar"></div>
+
+    <div id="hint"></div>
+    <div id="fxlayer"></div>
+    <div id="toasts"></div>
+
+    <div id="chatlog"></div>
+    <div id="chathint">Enter – chatta</div>
+    <form id="chatform" autocomplete="off">
+      <input id="chatinput" maxlength="200" placeholder="Skriv ett meddelande…" />
+    </form>
+
+    <!-- Byggmeny -->
+    <div id="buildbar">
+      <div class="title">🔨 Byggläge – <span id="buildModeName">Välj del</span></div>
+      <div id="buildSlots"></div>
+      <div class="foot">1-7 väljer del · vänster mus bygger · B/Esc avbryter</div>
+    </div>
+
+    <!-- Inventarie + hantverk -->
+    <div id="craftpanel" class="panel">
+      <div class="panel-head">
+        <h2>🎒 Inventarie &amp; hantverk</h2>
+        <button data-close="craftpanel">✕</button>
+      </div>
+      <div class="panel-body two-col">
+        <div class="col">
+          <h3>Resurser</h3>
+          <div id="resList" class="list"></div>
+          <h3>Verktyg &amp; prylar</h3>
+          <div id="itemList" class="list"></div>
+          <h3>Status</h3>
+          <div id="statList" class="list small"></div>
+        </div>
+        <div class="col">
+          <h3>Tillverka</h3>
+          <div id="recipeList" class="list recipes"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Förvaringslåda -->
+    <div id="containerpanel" class="panel">
+      <div class="panel-head">
+        <h2 id="containerName">📦 Förvaringslåda</h2>
+        <button data-close="containerpanel">✕</button>
+      </div>
+      <div class="panel-body two-col">
+        <div class="col">
+          <h3>I lådan</h3>
+          <div id="containerItems" class="list"></div>
+        </div>
+        <div class="col">
+          <h3>I ryggsäcken</h3>
+          <div id="playerItems" class="list"></div>
+        </div>
+      </div>
+      <div class="foot">Klicka på ett föremål för att flytta det mellan lådan och dig</div>
+    </div>
+
+    <!-- Lootbag -->
+    <div id="lootpanel" class="panel">
+      <div class="panel-head">
+        <h2>💀 Offerpåse</h2>
+        <button data-close="lootpanel">✕</button>
+      </div>
+      <div class="panel-body">
+        <div id="lootItems" class="list"></div>
+        <button id="lootAll" class="primary">Ta allt</button>
+        <div id="lootWarn" class="warn"></div>
+      </div>
+    </div>
+
+    <div id="hudmsg"></div>
+    <div id="hurtflash"></div>
+    <div id="coldflash"></div>
+
+    <!-- Dödskärm -->
+    <div id="deathscreen">
+      <h1>Du dog</h1>
+      <p id="deathCause">–</p>
+      <p id="deathTimer">Återuppstår om 8 s…</p>
+      <button id="respawnBtn" class="primary">Återuppstå nu</button>
+      <p class="small">Dina saker ligger kvar i en påse där du dog.</p>
+    </div>
+
+    <!-- Startmeny -->
+    <div id="menu">
+      <div class="menu-card">
+        <h1>🪓 RUST <span>MVP</span></h1>
+        <p class="tagline">Överlev på ön: samla trä, sten och metall, bygg ett skydd, håll värmen – och se upp för andra spelare.</p>
+        <form id="joinForm" autocomplete="off">
+          <label>Spelarnamn
+            <input id="nameInput" maxlength="16" placeholder="t.ex. Björn" required minlength="2" />
+          </label>
+          <button type="submit" class="primary" id="joinBtn">Anslut till servern</button>
+          <button type="button" class="primary" id="resumeBtn" style="display:none">▶ Fortsätt spela</button>
+        </form>
+        <div id="menuStatus" class="status"></div>
+        <div class="serverinfo" id="serverinfo"></div>
+        <div class="controls">
+          <h3>Kontroller</h3>
+          <div class="grid">
+            <span><b>W A S D</b> gå</span><span><b>Shift</b> spring</span>
+            <span><b>Space</b> hoppa</span><span><b>Ctrl/C</b> huka</span>
+            <span><b>Vänster mus</b> slå/samla/använd</span><span><b>Höger mus</b> avbryt</span>
+            <span><b>E</b> interagera (dörr, låda, påse)</span><span><b>R</b> riv byggdel</span>
+            <span><b>B</b> byggmeny</span><span><b>Tab</b> inventarie &amp; hantverk</span>
+            <span><b>1–0</b> hotbar</span><span><b>F</b> ät / använd</span>
+            <span><b>Enter</b> chatt</span><span><b>Esc</b> släpp musen</span>
+          </div>
+          <h3>Mål med MVP:n</h3>
+          <p class="small">Spawna → samla → hantverka → bygg ett litet skydd → hitta andra spelare → överlev → dö/respawna → fortsätt uppgradera.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="disconnect" class="overlay">
+      <div class="menu-card small">
+        <h2>Anslutningen bröts</h2>
+        <p id="disconnectText">Servern svarar inte.</p>
+        <button id="reconnectBtn" class="primary">Försök igen</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
